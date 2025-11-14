@@ -73,11 +73,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Add metadata about which analyzers were tried
-    analysis.meta = {
-      ...analysis.meta,
-      used: usedAnalyzers,
-      isFallback: usedAnalyzers.length > 1, // True if we had to fallback
-    };
+    if (!analysis.meta) {
+      analysis.meta = { used: usedAnalyzers };
+    } else {
+      analysis.meta.used = usedAnalyzers;
+    }
+    analysis.meta.isFallback = usedAnalyzers.length > 1; // True if we had to fallback
 
     const payload = mapToLegacyResponse(analysis);
 

@@ -24,6 +24,7 @@ export type AnalyzeOutput = {
   meta?: {
     used: AnalyzerSource[];
     latencyMs?: number;
+    isFallback?: boolean;
   };
 };
 
