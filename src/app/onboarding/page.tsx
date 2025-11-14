@@ -60,7 +60,7 @@ export default function OnboardingPage() {
       };
 
       completeOnboarding(userData, preferencesData);
-      router.push('/');
+      router.push('/dashboard');
     }
   };
 
@@ -89,7 +89,7 @@ export default function OnboardingPage() {
           <Card className="w-full max-w-md mx-auto">
             <CardHeader className="text-center">
               <div className="text-6xl mb-4">🐾</div>
-              <CardTitle className="text-2xl text-green-600">Meet Your HabitPet!</CardTitle>
+              <CardTitle className="text-2xl text-teal-600">Meet Your Forki!</CardTitle>
             </CardHeader>
             <CardContent className="text-center space-y-4">
               <p className="text-lg text-gray-700">
@@ -100,7 +100,7 @@ export default function OnboardingPage() {
               </p>
               <Button
                 onClick={handleNext}
-                className="w-full bg-green-500 hover:bg-green-600 text-white text-lg py-6"
+                className="w-full bg-teal-500 hover:bg-teal-600 text-white text-lg py-6"
                 size="lg"
               >
                 Let&apos;s Get Started!
@@ -244,7 +244,7 @@ export default function OnboardingPage() {
               </div>
               <Button
                 onClick={handleNext}
-                className="w-full mt-6 bg-green-500 hover:bg-green-600"
+                className="w-full mt-6 bg-teal-500 hover:bg-teal-600"
                 size="lg"
               >
                 Done! Start Journey 🎉
@@ -259,7 +259,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-yellow-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-100 flex items-center justify-center p-4">
       {renderStep()}
     </div>
   );

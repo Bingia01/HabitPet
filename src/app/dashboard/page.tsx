@@ -47,10 +47,10 @@ function DashboardContent() {
 
   if (!state.isOnboardingComplete || !state.preferences || !state.progress) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-yellow-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-100 flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">🐾</div>
-          <p>Loading your HabitPet...</p>
+          <p>Loading your Forki...</p>
         </div>
       </div>
     );
@@ -84,11 +84,11 @@ function DashboardContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-yellow-50">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-100">
       {/* Header */}
       <div className="bg-white shadow-sm">
         <div className="max-w-md mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-green-600">HabitPet</h1>
+          <h1 className="text-xl font-bold text-teal-600">Forki</h1>
         </div>
       </div>
 
@@ -105,7 +105,7 @@ function DashboardContent() {
         <div className="w-full">
           <Button
             size="lg"
-            className="w-full h-16 bg-green-500 hover:bg-green-600 text-white text-lg font-semibold rounded-xl shadow-lg"
+            className="w-full h-16 bg-teal-500 hover:bg-teal-600 text-white text-lg font-semibold rounded-xl shadow-lg"
             onClick={() => router.push('/add-food')}
           >
             🍎 Add Food
@@ -124,7 +124,7 @@ function DashboardContent() {
             <CardContent>
               <div className="w-full bg-gray-200 rounded-full h-3">
                 <div
-                  className="bg-green-500 h-3 rounded-full transition-all duration-1000"
+                  className="bg-teal-500 h-3 rounded-full transition-all duration-1000"
                   style={{ width: `${Math.min(state.progress.daily_progress, 100)}%` }}
                 ></div>
               </div>
@@ -155,7 +155,7 @@ function DashboardContent() {
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-4">
           <Card className="text-center p-4">
-            <div className="text-2xl font-bold text-green-600">{state.progress.level}</div>
+            <div className="text-2xl font-bold text-teal-600">{state.progress.level}</div>
             <div className="text-xs text-gray-500">Level</div>
           </Card>
           <Card className="text-center p-4">
@@ -185,7 +185,7 @@ function DashboardContent() {
                         <span className="text-xl">{log.emoji}</span>
                         <span className="text-sm font-medium">{log.food_type}</span>
                       </div>
-                      <span className="text-sm text-green-600 font-semibold">{log.calories} cal</span>
+                      <span className="text-sm text-teal-600 font-semibold">{log.calories} cal</span>
                     </div>
                   ))}
               </div>
@@ -197,7 +197,7 @@ function DashboardContent() {
         <div className="fixed bottom-20 right-4">
           <Button
             size="lg"
-            className="w-16 h-16 rounded-full bg-green-500 hover:bg-green-600 shadow-lg"
+            className="w-16 h-16 rounded-full bg-teal-500 hover:bg-teal-600 shadow-lg"
             onClick={() => router.push('/add-food')}
           >
             <Plus className="w-8 h-8" />
@@ -209,8 +209,8 @@ function DashboardContent() {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t">
         <div className="max-w-md mx-auto flex">
           <Button variant="ghost" className="flex-1 py-4 flex flex-col gap-1">
-            <div className="w-6 h-6 bg-green-500 rounded"></div>
-            <span className="text-xs text-green-600 font-medium">Home</span>
+            <div className="w-6 h-6 bg-teal-500 rounded"></div>
+            <span className="text-xs text-teal-600 font-medium">Home</span>
           </Button>
           <Button
             variant="ghost"
@@ -237,10 +237,10 @@ function DashboardContent() {
 export default function Dashboard() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-yellow-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-100 flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">🐾</div>
-          <p>Loading your HabitPet...</p>
+          <p>Loading your Forki...</p>
         </div>
       </div>
     }>

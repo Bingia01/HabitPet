@@ -9,7 +9,7 @@ import { FOOD_PREFERENCES, PORTION_SIZES } from '@/lib/constants';
 import { FoodPreference } from '@/types';
 import { useDemo } from '@/contexts/DemoContext';
 import { usePet } from '@/contexts/PetContext';
-import { FinalCameraCapture } from '@/components/FinalCameraCapture';
+import { ImprovedCameraCapture } from '@/components/ImprovedCameraCapture';
 
 type AddFoodStep = 'method' | 'camera' | 'manual' | 'portion' | 'confirm';
 
@@ -37,7 +37,7 @@ export default function AddFoodPage() {
   });
 
   // Handle food submission from camera
-  const handleFoodSubmission = async (foodAnalysis: { foodType: string; calories: number; weight: number; emoji?: string }) => {
+  const handleFoodSubmission = async (foodAnalysis: { foodType: string; calories: number; weight: number; emoji?: string; macros?: { proteinG: number; carbsG: number; fatG: number; fiberG?: number } }) => {
     setIsAnalyzing(true);
     
     try {
@@ -197,7 +197,7 @@ export default function AddFoodPage() {
                     key={food.emoji}
                     variant="outline"
                     onClick={() => selectFood(food.emoji)}
-                    className="aspect-square flex flex-col gap-1 p-2 hover:bg-green-50"
+                    className="aspect-square flex flex-col gap-1 p-2 hover:bg-teal-50"
                   >
                     <span className="text-3xl">{food.emoji}</span>
                     <span className="text-xs">{food.label}</span>
@@ -248,11 +248,11 @@ export default function AddFoodPage() {
               <div>
                 <h3 className="text-xl font-semibold">{foodData.name}</h3>
                 <p className="text-gray-500">{foodData.portion} portion</p>
-                <p className="text-2xl font-bold text-green-600">{totalCalories} calories</p>
+                <p className="text-2xl font-bold text-teal-600">{totalCalories} calories</p>
               </div>
               <Button
                 onClick={confirmLog}
-                className="w-full bg-green-500 hover:bg-green-600 text-white"
+                className="w-full bg-teal-500 hover:bg-teal-600 text-white"
                 size="lg"
               >
                 Log Food! 🎉
@@ -267,14 +267,14 @@ export default function AddFoodPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-yellow-50">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-100">
       {/* Header */}
       <div className="bg-white shadow-sm">
         <div className="max-w-md mx-auto px-4 py-4 flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={goBack}>
             <ArrowLeft className="w-6 h-6" />
           </Button>
-          <h1 className="text-xl font-bold text-green-600">Add Food</h1>
+          <h1 className="text-xl font-bold text-teal-600">Add Food</h1>
         </div>
       </div>
 
@@ -285,7 +285,7 @@ export default function AddFoodPage() {
 
       {/* Camera Component */}
       {showCamera && (
-        <FinalCameraCapture
+        <ImprovedCameraCapture
           onCapture={handleFoodSubmission}
           onClose={() => setShowCamera(false)}
         />
@@ -296,7 +296,7 @@ export default function AddFoodPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
           <Card className="w-80">
             <CardContent className="p-6 text-center">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-green-600" />
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-teal-600" />
               <h3 className="text-lg font-semibold mb-2">Analyzing Food</h3>
               <p className="text-gray-600">
                 AI is identifying your food and calculating calories...

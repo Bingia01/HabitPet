@@ -9,7 +9,7 @@ export default function FinalCTA() {
   const router = useRouter();
 
   const handleWebAppClick = () => {
-    router.push('/dashboard');
+    router.push('/onboarding');
   };
 
   const handleAppStoreClick = () => {

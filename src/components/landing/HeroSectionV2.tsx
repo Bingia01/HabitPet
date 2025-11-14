@@ -13,7 +13,7 @@ export default function HeroSectionV2() {
   const [mascotState, setMascotState] = useState<"happy" | "motivated">("happy");
 
   const handleWebAppClick = () => {
-    router.push('/dashboard');
+    router.push('/onboarding');
   };
 
   const handleAppStoreClick = () => {
