@@ -363,6 +363,16 @@ export function ImprovedCameraCapture({ onCapture, onClose }: ImprovedCameraCapt
       abortControllerRef.current = null;
     }
 
+    // Stop existing stream tracks and clear video srcObject
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    setStream(null);
+
     if (capturedImageRef.current) {
       URL.revokeObjectURL(capturedImageRef.current);
       capturedImageRef.current = null;
@@ -377,14 +387,17 @@ export function ImprovedCameraCapture({ onCapture, onClose }: ImprovedCameraCapt
     setErrorCode('');
     setAnalyzerSource('');
     
-    // Restart camera if stream was stopped
-    if (!stream) {
-      setIsRestarting(true);
-      try {
-        await startCamera();
-      } finally {
-        setIsRestarting(false);
-      }
+    // Always restart camera to ensure clean reconnection
+    setIsRestarting(true);
+    try {
+      await startCamera();
+    } catch (error) {
+      console.error('Error restarting camera:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to restart camera. Please try again.';
+      setError(errorMessage);
+      setErrorCode('CAMERA_ERROR');
+    } finally {
+      setIsRestarting(false);
     }
   };
 

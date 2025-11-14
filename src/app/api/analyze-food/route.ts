@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { stubAnalyzer } from '@/lib/analyzers/stub';
 import { supabaseAnalyzer } from '@/lib/analyzers/supabase';
 import { openAIAnalyzer } from '@/lib/analyzers/openai';
+import { getFallbackChain } from '@/lib/config/analyzer-config';
 import type { Analyzer, AnalyzerSource, AnalyzeInput, AnalyzeOutput } from '@/lib/types/analyzer';
 
 export const runtime = 'nodejs';
@@ -18,8 +19,6 @@ const RequestSchema = z.object({
   region: z.string().optional(),
 });
 
-const ANALYZER_CHOICE = (process.env.ANALYZER_CHOICE ?? 'stub').toLowerCase();
-
 export async function POST(request: NextRequest) {
   try {
     const { imageBase64, imageUrl, region, errorResponse } = await extractInput(request);
@@ -32,15 +31,54 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No image provided' }, { status: 400 });
     }
 
-    const analyzer = resolveAnalyzer(ANALYZER_CHOICE);
-
     const baseInput: AnalyzeInput = {
       imageBase64,
       imageUrl,
       region,
     };
 
-    const analysis = await tryAnalyze(analyzer, baseInput);
+    // USE FALLBACK CHAIN - Try analyzers in sequence
+    const fallbackChain = getFallbackChain();
+    let lastError: Error | null = null;
+    let analysis: AnalyzeOutput | null = null;
+    const usedAnalyzers: AnalyzerSource[] = [];
+
+    // Try each analyzer in the chain until one succeeds
+    for (const analyzerType of fallbackChain) {
+      try {
+        const analyzer = resolveAnalyzer(analyzerType);
+        console.log(`[analyze-food] Trying ${analyzerType} analyzer...`);
+        analysis = await analyzer.analyze(baseInput);
+        usedAnalyzers.push(analyzerType);
+        console.log(`[analyze-food] ✓ ${analyzerType} analyzer succeeded`);
+        break; // Success! Exit loop
+      } catch (error) {
+        console.warn(`[analyze-food] ✗ ${analyzerType} analyzer failed:`, error);
+        usedAnalyzers.push(analyzerType);
+        lastError = error instanceof Error ? error : new Error(String(error));
+        // Continue to next analyzer in chain
+      }
+    }
+
+    if (!analysis) {
+      console.error('[analyze-food] All analyzers failed. Last error:', lastError);
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'All analyzers failed to analyze the image',
+          details: lastError?.message 
+        },
+        { status: 500 }
+      );
+    }
+
+    // Add metadata about which analyzers were tried
+    analysis.meta = {
+      ...analysis.meta,
+      used: usedAnalyzers,
+      isFallback: usedAnalyzers.length > 1, // True if we had to fallback
+    };
+
     const payload = mapToLegacyResponse(analysis);
 
     const response = NextResponse.json(payload, {
@@ -116,17 +154,11 @@ function resolveAnalyzer(choice: string): Analyzer {
     case 'openai':
     case 'openai-vision':
       return openAIAnalyzer;
-    default:
+    case 'stub':
       return stubAnalyzer;
-  }
-}
-
-async function tryAnalyze(analyzer: Analyzer, input: AnalyzeInput): Promise<AnalyzeOutput> {
-  try {
-    return await analyzer.analyze(input);
-  } catch (error) {
-    console.warn('[analyze-food] analyzer failed, falling back to stub', error);
-    return stubAnalyzer.analyze(input);
+    default:
+      console.warn(`[analyze-food] Unknown analyzer type: ${choice}, falling back to stub`);
+      return stubAnalyzer;
   }
 }
 

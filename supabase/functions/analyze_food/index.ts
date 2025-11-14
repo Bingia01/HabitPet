@@ -225,7 +225,16 @@ async function callClassifier(
   }
 
   const prompt =
-    "You are a nutrition assistant. Identify the food in this image and provide its nutritional properties. Respond with a single JSON object using snake_case keys: label (string, specific food name like 'grilled chicken salad' or 'pepperoni pizza'), confidence (0-1, identification confidence), parent_label (string, general category like 'salad', 'pizza', 'rice bowl'), density_g_ml (number, typical density in g/mL for this food, range 0.3-1.2), kcal_per_g (number, kilocalories per gram for this specific food). Use your knowledge of food composition and nutrition databases. Do not estimate portion size or volume - only provide the food's inherent nutritional properties. Do not output any additional text.";
+    "You are a food identification assistant. Identify ONLY what you can see in this image. Be literal and accurate - do NOT add context that isn't visible.\n\n" +
+    "CRITICAL RULES:\n" +
+    "1. Identify ONLY the food item(s) visible - don't assume preparation method or dish type unless clearly visible\n" +
+    "2. If you see chicken in a box/container, identify it as 'chicken' NOT 'chicken sandwich' or 'chicken meal'\n" +
+    "3. If you see rice in a bowl, identify it as 'rice' NOT 'rice bowl' unless you can see other ingredients mixed in\n" +
+    "4. Be specific about cooking method ONLY if clearly visible (grilled, fried, steamed, etc.)\n" +
+    "5. For packaged foods, identify the base food item, not the brand name\n" +
+    "6. Don't assume it's a 'sandwich' unless you can clearly see bread/bun around the food\n" +
+    "7. Don't assume it's a 'salad' unless you can clearly see mixed vegetables/greens\n\n" +
+    "Respond with a single JSON object using snake_case keys: label (string, accurate food name based ONLY on what's visible, e.g., 'chicken', 'rice', 'grilled chicken breast'), confidence (0-1, identification confidence), parent_label (string, general category like 'protein', 'grain', 'vegetable'), density_g_ml (number, typical density in g/mL for this food, range 0.3-1.2), kcal_per_g (number, kilocalories per gram for this specific food), estimated_volume_ml (number, your best estimate of the food volume in milliliters based on visual cues, portion size, and common serving sizes), estimated_weight_g (number, estimated weight in grams), total_calories (number, estimated total calories for this portion). Use your knowledge of food composition, typical portion sizes, and visual analysis. Do not output any additional text.";
 
   const content: Array<Record<string, unknown>> = [
     {
