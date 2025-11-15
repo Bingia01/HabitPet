@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Camera, X, RotateCcw, Check, ArrowLeft, AlertCircle, RefreshCw } from 'lucide-react';
 import { CameraErrorDisplay } from './CameraErrorDisplay';
 import { FoodSelectionModal } from './FoodSelectionModal';
+import { cameraCapture, foodAnalyzer } from '@forki/features';
 
 interface FoodAnalysis {
   foodType: string;
@@ -29,8 +30,6 @@ interface ImprovedCameraCaptureProps {
 }
 
 const ANALYSIS_TIMEOUT = 30000; // 30 seconds
-const MIN_IMAGE_SIZE = 1000; // 1KB
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export function ImprovedCameraCapture({ onCapture, onClose }: ImprovedCameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -65,6 +64,7 @@ export function ImprovedCameraCapture({ onCapture, onClose }: ImprovedCameraCapt
 
   const cleanup = () => {
     if (streamRef.current) {
+      cameraCapture.stopCamera(streamRef.current);
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
@@ -85,29 +85,13 @@ export function ImprovedCameraCapture({ onCapture, onClose }: ImprovedCameraCapt
       setErrorCode('');
       console.log('Starting camera...');
 
-      if (!navigator.mediaDevices?.getUserMedia) {
-        setError('Camera access is not supported in this browser. Please try Safari or Chrome.');
-        setErrorCode('NOT_SUPPORTED');
-        return;
-      }
-
-      const constraints: MediaStreamConstraints = {
-        video: {
-          facingMode: { ideal: 'environment' },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
-        },
-        audio: false
-      };
-
-      let mediaStream: MediaStream;
-
-      try {
-        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      } catch (constraintError) {
-        console.warn('Advanced constraints failed, falling back to default camera request', constraintError);
-        mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-      }
+      // Use forki-features cameraCapture
+      const mediaStream = await cameraCapture.startCamera({
+        facingMode: 'environment',
+        width: 1920,
+        height: 1080,
+      });
+      
       console.log('Stream obtained:', mediaStream);
 
       setStream(mediaStream);
@@ -125,45 +109,20 @@ export function ImprovedCameraCapture({ onCapture, onClose }: ImprovedCameraCapt
           videoRef.current?.play();
         };
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Camera error:', error);
-      let message = 'Camera error. Please check permissions and try again.';
-      let code = 'CAMERA_ERROR';
-      
-      if (error instanceof DOMException) {
-        if (error.name === 'NotAllowedError') {
-          message = 'Camera permission denied. Please allow camera access in your browser settings.';
-          code = 'PERMISSION_DENIED';
-        } else if (error.name === 'NotFoundError') {
-          message = 'No camera device found. Try connecting a camera or using a different device.';
-          code = 'NO_CAMERA';
-        } else if (error.name === 'NotReadableError') {
-          message = 'Camera is already in use by another application. Close other apps using the camera.';
-          code = 'CAMERA_IN_USE';
-        }
+      // Handle CameraError from forki-features
+      if (error && typeof error === 'object' && 'message' in error && 'code' in error) {
+        setError(error.message);
+        setErrorCode(error.code);
+      } else {
+        setError('Camera error. Please check permissions and try again.');
+        setErrorCode('CAMERA_ERROR');
       }
-      setError(message);
-      setErrorCode(code);
     }
   };
 
-  const validateCanvas = (canvas: HTMLCanvasElement): boolean => {
-    if (!canvas.width || !canvas.height) {
-      console.error('Canvas has invalid dimensions:', canvas.width, canvas.height);
-      setError('Failed to capture image. Canvas has invalid dimensions.');
-      setErrorCode('NO_IMAGE');
-      return false;
-    }
-    if (canvas.width < 100 || canvas.height < 100) {
-      console.error('Canvas too small:', canvas.width, canvas.height);
-      setError('Image too small. Please get closer to your food.');
-      setErrorCode('NO_IMAGE');
-      return false;
-    }
-    return true;
-  };
-
-  const capturePhoto = () => {
+  const capturePhoto = async () => {
     if (!videoRef.current || !canvasRef.current) {
       setError('Camera not ready. Please wait for camera to initialize.');
       setErrorCode('NO_IMAGE');
@@ -172,60 +131,10 @@ export function ImprovedCameraCapture({ onCapture, onClose }: ImprovedCameraCapt
 
     setIsCapturing(true);
     
-    const canvas = canvasRef.current;
-    const video = videoRef.current;
-    
-    // Check if video is ready
-    if (video.readyState < 2) {
-      console.warn('Video not ready, waiting...');
-      video.onloadeddata = () => {
-        capturePhoto();
-      };
-      setIsCapturing(false);
-      return;
-    }
-
-    const context = canvas.getContext('2d');
-    if (!context) {
-      setIsCapturing(false);
-      setError('Failed to get canvas context.');
-      setErrorCode('NO_IMAGE');
-      return;
-    }
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    if (!validateCanvas(canvas)) {
-      setIsCapturing(false);
-      return;
-    }
-
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        setIsCapturing(false);
-        setError('Failed to create image blob.');
-        setErrorCode('NO_IMAGE');
-        return;
-      }
-
-      // Validate blob size
-      if (blob.size < MIN_IMAGE_SIZE) {
-        setIsCapturing(false);
-        setError('Image too small. Please try again.');
-        setErrorCode('NO_IMAGE');
-        return;
-      }
-
-      if (blob.size > MAX_IMAGE_SIZE) {
-        setIsCapturing(false);
-        setError('Image too large. Please try again.');
-        setErrorCode('NO_IMAGE');
-        return;
-      }
-
+    try {
+      // Use forki-features cameraCapture to capture photo
+      const blob = await cameraCapture.capturePhoto(videoRef.current, canvasRef.current);
+      
       if (capturedImageRef.current) {
         URL.revokeObjectURL(capturedImageRef.current);
       }
@@ -234,7 +143,17 @@ export function ImprovedCameraCapture({ onCapture, onClose }: ImprovedCameraCapt
       setIsCapturing(false);
       capturedImageRef.current = imageUrl;
       setCapturedImage(imageUrl);
-    }, 'image/jpeg', 0.8);
+    } catch (error: any) {
+      setIsCapturing(false);
+      // Handle CameraError from forki-features
+      if (error && typeof error === 'object' && 'message' in error && 'code' in error) {
+        setError(error.message);
+        setErrorCode(error.code);
+      } else {
+        setError('Failed to capture image. Please try again.');
+        setErrorCode('NO_IMAGE');
+      }
+    }
   };
 
   const analyzePhoto = async () => {
@@ -249,97 +168,70 @@ export function ImprovedCameraCapture({ onCapture, onClose }: ImprovedCameraCapt
     setErrorCode('');
     setAnalyzerSource('');
     
-    // Create new abort controller for this request
+    // Create new abort controller for this request (for timeout)
     abortControllerRef.current = new AbortController();
-    const signal = abortControllerRef.current.signal;
     
     try {
-      canvasRef.current.toBlob(async (blob) => {
-        if (!blob) {
-          setIsAnalyzing(false);
-          setError('Failed to process image.');
-          setErrorCode('NO_IMAGE');
-          return;
-        }
+      // Convert canvas to blob
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvasRef.current!.toBlob((b) => resolve(b), 'image/jpeg', 0.8);
+      });
 
-        try {
-          // Create timeout promise
-          const timeoutPromise = new Promise<never>((_, reject) => {
-            setTimeout(() => reject(new Error('Analysis timeout')), ANALYSIS_TIMEOUT);
-          });
+      if (!blob) {
+        setIsAnalyzing(false);
+        setError('Failed to process image.');
+        setErrorCode('NO_IMAGE');
+        return;
+      }
 
-          // Create form data
-          const formData = new FormData();
-          formData.append('image', blob, 'food.jpg');
-          
-          // Make API call with timeout
-          const fetchPromise = fetch('/api/analyze-food', {
-            method: 'POST',
-            body: formData,
-            signal,
-          });
+      // Create timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          abortControllerRef.current?.abort();
+          reject(new Error('Analysis timeout'));
+        }, ANALYSIS_TIMEOUT);
+      });
 
-          const response = await Promise.race([fetchPromise, timeoutPromise]);
+      // Use forki-features foodAnalyzer
+      const analysisPromise = foodAnalyzer.analyzeImage(blob);
+      
+      const result = await Promise.race([analysisPromise, timeoutPromise]);
 
-          if (signal.aborted) {
-            setIsAnalyzing(false);
-            setError('Request was cancelled.');
-            setErrorCode('ABORTED');
-            return;
-          }
-
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || `Analysis failed: ${response.status}`);
-          }
-          
-          const result = await response.json();
-          
-          // Extract analyzer source from response
-          const source = result.meta?.used?.[0] || 'unknown';
-          const usedFallback = result.meta?.used?.length > 1;
-          setAnalyzerSource(source);
-          
-          const realAnalysis: FoodAnalysis = {
-            foodType: result.foodType || 'Unknown Food',
-            confidence: result.confidence || 0.5,
-            calories: result.calories || 100,
-            weight: result.weight || 100,
-            emoji: result.emoji || '🍽️',
-            macros: result.macros,
-            analyzerSource: source,
-            usedFallback,
-          };
-          
-          setFoodAnalysis(realAnalysis);
-          setShowAnalysis(true);
-          setIsAnalyzing(false);
-        } catch (error) {
-          console.error('AI Analysis failed:', error);
-          setIsAnalyzing(false);
-          
-          if (error instanceof Error) {
-            if (error.message === 'Analysis timeout') {
-              setError('Analysis took too long. Please try again.');
-              setErrorCode('TIMEOUT');
-            } else if (error.name === 'AbortError') {
-              setError('Request was cancelled.');
-              setErrorCode('ABORTED');
-            } else {
-              setError(`Analysis failed: ${error.message}`);
-              setErrorCode('NETWORK_ERROR');
-            }
-          } else {
-            setError('Analysis failed. Please try again.');
-            setErrorCode('NETWORK_ERROR');
-          }
-        }
-      }, 'image/jpeg', 0.8);
-    } catch (error) {
-      console.error('Analysis failed:', error);
+      // Extract analyzer source from result
+      const source = result.analyzerSource || 'unknown';
+      const usedFallback = result.usedFallback || false;
+      setAnalyzerSource(source);
+      
+      const realAnalysis: FoodAnalysis = {
+        foodType: result.foodType || 'Unknown Food',
+        confidence: result.confidence || 0.5,
+        calories: result.calories || 100,
+        weight: result.weight || 100,
+        emoji: result.emoji || '🍽️',
+        macros: result.macros,
+        analyzerSource: source,
+        usedFallback,
+      };
+      
+      setFoodAnalysis(realAnalysis);
+      setShowAnalysis(true);
       setIsAnalyzing(false);
-      setError('Failed to analyze image.');
-      setErrorCode('NETWORK_ERROR');
+    } catch (error) {
+      console.error('AI Analysis failed:', error);
+      setIsAnalyzing(false);
+      
+      if (error instanceof Error) {
+        if (error.message === 'Analysis timeout') {
+          setError('Analysis took too long. Please try again.');
+          setErrorCode('TIMEOUT');
+        } else {
+          setError(`Analysis failed: ${error.message}`);
+          setErrorCode('NETWORK_ERROR');
+        }
+      } else {
+        setError('Analysis failed. Please try again.');
+        setErrorCode('NETWORK_ERROR');
+      }
     }
   };
 
@@ -363,8 +255,9 @@ export function ImprovedCameraCapture({ onCapture, onClose }: ImprovedCameraCapt
       abortControllerRef.current = null;
     }
 
-    // Stop existing stream tracks and clear video srcObject
+    // Stop camera using forki-features
     if (streamRef.current) {
+      cameraCapture.stopCamera(streamRef.current);
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
