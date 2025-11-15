@@ -22,6 +22,13 @@ interface ClassifierResponse {
   kcalPerG: number;
   source?: string;
   components?: ClassifierComponent[];
+  macros?: {
+    proteinG: number;
+    carbsG: number;
+    fatG: number;
+  };
+  totalCalories?: number;
+  estimatedWeightG?: number;
 }
 
 interface AnalyzerItem {
@@ -46,6 +53,12 @@ interface AnalyzerItem {
     restaurant: string;
     itemName: string;
     calories: number;
+  };
+  macros?: {
+    proteinG: number;
+    carbsG: number;
+    fatG: number;
+    fiberG?: number;
   };
 }
 
@@ -97,15 +110,21 @@ serve(async (req) => {
       // Label Path: OCR nutrition label
       evidence.add("Label");
       const nutritionData = await extractNutritionLabel({ imageUrl, imageBase64 });
+      const label = nutritionData.label || "packaged food";
+      const calories = nutritionData.calories;
+      
+      // Calculate macros for packaged food (estimate weight from calories)
+      const estimatedWeight = calories > 0 ? calories / 2.5 : 0; // Rough estimate: ~2.5 kcal/g average
+      const macros = await calculateMacros(label, estimatedWeight, calories);
 
       response = {
         items: [
           {
-            label: nutritionData.label || "packaged food",
+            label,
             confidence: nutritionData.confidence,
-            calories: nutritionData.calories,
-            sigmaCalories: nutritionData.calories * 0.05, // 5% uncertainty for label reading
-            weightGrams: 0, // Not needed for packaged food
+            calories,
+            sigmaCalories: calories * 0.05, // 5% uncertainty for label reading
+            weightGrams: estimatedWeight,
             volumeML: 0,
             evidence: Array.from(evidence),
             path: "label",
@@ -114,6 +133,7 @@ serve(async (req) => {
               caloriesPerServing: nutritionData.caloriesPerServing,
               totalServings: nutritionData.totalServings,
             },
+            macros,
           },
         ],
         meta: {
@@ -129,15 +149,21 @@ serve(async (req) => {
         imageUrl,
         imageBase64,
       });
+      const label = menuData.itemName;
+      const calories = menuData.calories;
+      
+      // Calculate macros for restaurant food (estimate weight from calories)
+      const estimatedWeight = calories > 0 ? calories / 2.5 : 0; // Rough estimate: ~2.5 kcal/g average
+      const macros = await calculateMacros(label, estimatedWeight, calories);
 
       response = {
         items: [
           {
-            label: menuData.itemName,
+            label,
             confidence: menuData.confidence,
-            calories: menuData.calories,
-            sigmaCalories: menuData.calories * 0.10, // 10% uncertainty for menu items
-            weightGrams: 0,
+            calories,
+            sigmaCalories: calories * 0.10, // 10% uncertainty for menu items
+            weightGrams: estimatedWeight,
             volumeML: 0,
             evidence: Array.from(evidence),
             path: "menu",
@@ -146,6 +172,7 @@ serve(async (req) => {
               itemName: menuData.itemName,
               calories: menuData.calories,
             },
+            macros,
           },
         ],
         meta: {
@@ -176,18 +203,39 @@ serve(async (req) => {
         kcalPerG: { mu: kcalPerG, sigma: kcalPerGSigma },
       };
 
+      // For web app, calculate calories and macros
+      const estimatedWeight = classifier.estimatedWeightG ?? 180; // DEFAULT_PORTION_GRAMS
+      
+      // Calculate macros if available from classifier or calculate from estimated values
+      let macros = classifier.macros;
+      if (!macros) {
+        const estimatedCalories = classifier.totalCalories 
+          ? Math.round(classifier.totalCalories)
+          : Math.round(estimatedWeight * kcalPerG);
+        macros = await calculateMacros(label, estimatedWeight, estimatedCalories);
+      }
+      
+      // Calculate calories from macros if available (more accurate than classifier's total_calories)
+      // Atwater factors: Protein 4 kcal/g, Carbs 4 kcal/g, Fat 9 kcal/g
+      const totalCalories = macros
+        ? Math.round(macros.proteinG * 4 + macros.carbsG * 4 + macros.fatG * 9)
+        : (classifier.totalCalories 
+            ? Math.round(classifier.totalCalories)
+            : Math.round(estimatedWeight * kcalPerG));
+
       response = {
         items: [
           {
             label,
             confidence: classifier.confidence ?? 0,
-            calories: 0, // Swift will do C = V × ρ × e
-            sigmaCalories: 0,
-            weightGrams: 0,
+            calories: totalCalories, // Calculated from macros (if available) or classifier's total_calories or weight × kcal_per_g
+            sigmaCalories: totalCalories * 0.15, // 15% uncertainty for VLM estimates
+            weightGrams: estimatedWeight,
             volumeML: 0,
             priors: finalPriors,
             evidence: Array.from(evidence),
             path: "geometry",
+            macros,
           },
         ],
         meta: {
@@ -234,7 +282,7 @@ async function callClassifier(
     "5. For packaged foods, identify the base food item, not the brand name\n" +
     "6. Don't assume it's a 'sandwich' unless you can clearly see bread/bun around the food\n" +
     "7. Don't assume it's a 'salad' unless you can clearly see mixed vegetables/greens\n\n" +
-    "Respond with a single JSON object using snake_case keys: label (string, accurate food name based ONLY on what's visible, e.g., 'chicken', 'rice', 'grilled chicken breast'), confidence (0-1, identification confidence), parent_label (string, general category like 'protein', 'grain', 'vegetable'), density_g_ml (number, typical density in g/mL for this food, range 0.3-1.2), kcal_per_g (number, kilocalories per gram for this specific food), estimated_volume_ml (number, your best estimate of the food volume in milliliters based on visual cues, portion size, and common serving sizes), estimated_weight_g (number, estimated weight in grams), total_calories (number, estimated total calories for this portion). Use your knowledge of food composition, typical portion sizes, and visual analysis. Do not output any additional text.";
+    "Respond with a single JSON object using snake_case keys: label (string, accurate food name based ONLY on what's visible, e.g., 'chicken', 'rice', 'grilled chicken breast'), confidence (0-1, identification confidence), parent_label (string, general category like 'protein', 'grain', 'vegetable'), density_g_ml (number, typical density in g/mL for this food, range 0.3-1.2), kcal_per_g (number, kilocalories per gram for this specific food), estimated_volume_ml (number, your best estimate of the food volume in milliliters based on visual cues, portion size, and common serving sizes), estimated_weight_g (number, estimated weight in grams), total_calories (number, estimated total calories for this portion), protein_g (number, grams of protein for this portion), carbs_g (number, grams of carbohydrates for this portion), fat_g (number, grams of fat for this portion). Use your knowledge of food composition, typical portion sizes, and visual analysis. For macros, use standard nutritional values: Protein 4 kcal/g, Carbs 4 kcal/g, Fat 9 kcal/g. Ensure calories ≈ (protein_g × 4) + (carbs_g × 4) + (fat_g × 9) ± 10%. Do not output any additional text.";
 
   const content: Array<Record<string, unknown>> = [
     {
@@ -278,8 +326,13 @@ async function callClassifier(
             parent_label: { type: "string" },
             density_g_ml: { type: "number" },
             kcal_per_g: { type: "number" },
+            estimated_weight_g: { type: "number" },
+            total_calories: { type: "number" },
+            protein_g: { type: "number" },
+            carbs_g: { type: "number" },
+            fat_g: { type: "number" },
           },
-          required: ["label", "confidence", "parent_label", "density_g_ml", "kcal_per_g"],
+          required: ["label", "confidence", "parent_label", "density_g_ml", "kcal_per_g", "protein_g", "carbs_g", "fat_g"],
           additionalProperties: false,
         },
       },
@@ -320,6 +373,15 @@ async function callClassifier(
     densityGML: parsed.density_g_ml,
     kcalPerG: parsed.kcal_per_g,
     source: "openai",
+    totalCalories: parsed.total_calories ? Math.round(parsed.total_calories) : undefined,
+    estimatedWeightG: parsed.estimated_weight_g ? Math.round(parsed.estimated_weight_g) : undefined,
+    macros: parsed.protein_g !== undefined && parsed.carbs_g !== undefined && parsed.fat_g !== undefined
+      ? {
+          proteinG: Math.round(parsed.protein_g * 10) / 10,
+          carbsG: Math.round(parsed.carbs_g * 10) / 10,
+          fatG: Math.round(parsed.fat_g * 10) / 10,
+        }
+      : undefined,
   };
 }
 
@@ -347,6 +409,11 @@ function parseClassifierJson(output: string): {
   parent_label?: string;
   density_g_ml: number;
   kcal_per_g: number;
+  estimated_weight_g?: number;
+  total_calories?: number;
+  protein_g?: number;
+  carbs_g?: number;
+  fat_g?: number;
 } {
   output = output.trim();
   const first = output.indexOf("{");
@@ -362,6 +429,59 @@ function clampConfidence(value: number | undefined): number {
     return 0.5;
   }
   return Math.min(1, Math.max(0, value));
+}
+
+// Calculate macros using 4-tier fallback: Food Priors → Standard Ratios → Undefined
+async function calculateMacros(
+  label: string,
+  weightGrams: number,
+  calories: number
+): Promise<{ proteinG: number; carbsG: number; fatG: number; fiberG?: number } | undefined> {
+  // Tier 1: Try food_priors database
+  const priors = await getPriorsForLabel(label);
+  if (priors?.macros && weightGrams > 0) {
+    const weightRatio = weightGrams / 100; // Convert per-100g to actual weight
+    return {
+      proteinG: Math.round(priors.macros.proteinPer100g * weightRatio * 10) / 10,
+      carbsG: Math.round(priors.macros.carbsPer100g * weightRatio * 10) / 10,
+      fatG: Math.round(priors.macros.fatPer100g * weightRatio * 10) / 10,
+      fiberG: priors.macros.fiberPer100g ? Math.round(priors.macros.fiberPer100g * weightRatio * 10) / 10 : undefined,
+    };
+  }
+
+  // Tier 2: Calculate from calories using standard ratios (if weight is known)
+  if (weightGrams > 0 && calories > 0) {
+    // Use typical macro ratios based on food category
+    const normalizedLabel = label.toLowerCase();
+    let proteinRatio = 0.15; // Default 15% protein
+    let carbsRatio = 0.55; // Default 55% carbs
+    let fatRatio = 0.30; // Default 30% fat
+
+    // Adjust ratios based on food type
+    if (normalizedLabel.includes("chicken") || normalizedLabel.includes("beef") || normalizedLabel.includes("fish") || normalizedLabel.includes("meat")) {
+      proteinRatio = 0.30;
+      carbsRatio = 0.0;
+      fatRatio = 0.20;
+    } else if (normalizedLabel.includes("rice") || normalizedLabel.includes("pasta") || normalizedLabel.includes("bread")) {
+      proteinRatio = 0.10;
+      carbsRatio = 0.75;
+      fatRatio = 0.15;
+    } else if (normalizedLabel.includes("salad") || normalizedLabel.includes("vegetable") || normalizedLabel.includes("broccoli")) {
+      proteinRatio = 0.20;
+      carbsRatio = 0.60;
+      fatRatio = 0.20;
+    }
+
+    // Calculate macros: calories × ratio / kcal per gram
+    const proteinG = Math.round((calories * proteinRatio / 4) * 10) / 10;
+    const carbsG = Math.round((calories * carbsRatio / 4) * 10) / 10;
+    const fatG = Math.round((calories * fatRatio / 9) * 10) / 10;
+
+    return { proteinG, carbsG, fatG };
+  }
+
+  // Tier 3: Return undefined if no data available
+  return undefined;
 }
 
 // Detect image type (packaged/restaurant/prepared)
