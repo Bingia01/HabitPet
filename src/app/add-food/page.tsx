@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Camera, Edit3, ArrowLeft, Loader2 } from 'lucide-react';
@@ -9,7 +10,26 @@ import { FOOD_PREFERENCES, PORTION_SIZES } from '@/lib/constants';
 import { FoodPreference } from '@/types';
 import { useDemo } from '@/contexts/DemoContext';
 import { usePet } from '@/contexts/PetContext';
-import { ImprovedCameraCapture } from '@/components/ImprovedCameraCapture';
+
+const ImprovedCameraCapture = dynamic(
+  () => import('@/components/ImprovedCameraCapture').then(mod => ({ default: mod.ImprovedCameraCapture })),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
+        <Card className="w-80">
+          <CardContent className="p-6 text-center">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-teal-600" />
+            <h3 className="text-lg font-semibold mb-2">Loading Camera</h3>
+            <p className="text-gray-600">
+              Preparing camera interface...
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+);
 
 type AddFoodStep = 'method' | 'camera' | 'manual' | 'portion' | 'confirm';
 
