@@ -163,6 +163,13 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 // Generate or retrieve unique user ID
 const getOrCreateUserId = (): string => {
   const STORAGE_KEY = 'forki-user-id';
+  
+  // SSR-safe: check for window before using localStorage
+  if (typeof window === 'undefined') {
+    // Server-side: generate temporary ID (will be replaced on client)
+    return 'temp-' + Math.random().toString(36).substring(7);
+  }
+  
   let userId = localStorage.getItem(STORAGE_KEY);
   
   if (!userId) {
@@ -183,6 +190,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const userIdRef = useRef<string>(getOrCreateUserId());
   const hasLoadedFromSupabaseRef = useRef(false);
 
+  // Update userIdRef on client side (SSR-safe)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Re-get the real user ID on client (replaces temp ID from SSR)
+      userIdRef.current = getOrCreateUserId();
+    }
+  }, []);
+
   // Load food logs from Supabase on mount
   useEffect(() => {
     const loadFoodLogsFromSupabase = async () => {
@@ -199,7 +214,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (logs && logs.length > 0) {
           // Replace all logs with Supabase data (avoid duplicates)
           // We'll dispatch a custom action to replace all logs at once
-          logs.forEach(log => {
+          logs.forEach((log: FoodLog) => {
             dispatch({ type: 'ADD_FOOD_LOG', payload: log });
           });
           console.log(`[DemoContext] ✅ Successfully loaded ${logs.length} food logs from Supabase`);
@@ -208,15 +223,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         console.error('[DemoContext] ❌ Failed to load food logs from Supabase:', error);
-        // Fallback to localStorage
-        const saved = localStorage.getItem('habitpet-app-state');
-        if (saved) {
-          try {
-            const parsedState = JSON.parse(saved);
-            dispatch({ type: 'LOAD_FROM_STORAGE', payload: parsedState });
-            console.log('[DemoContext] Loaded state from localStorage fallback');
-          } catch (e) {
-            console.error('[DemoContext] Failed to load app state from localStorage:', e);
+        // Fallback to localStorage (SSR-safe)
+        if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem('habitpet-app-state');
+          if (saved) {
+            try {
+              const parsedState = JSON.parse(saved);
+              dispatch({ type: 'LOAD_FROM_STORAGE', payload: parsedState });
+              console.log('[DemoContext] Loaded state from localStorage fallback');
+            } catch (e) {
+              console.error('[DemoContext] Failed to load app state from localStorage:', e);
+            }
           }
         }
       }
@@ -229,25 +246,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (hasLoadedFromSupabaseRef.current) return; // Skip if already loaded from Supabase
     
-    const saved = localStorage.getItem('habitpet-app-state');
-    if (saved) {
-      try {
-        const parsedState = JSON.parse(saved);
-        dispatch({ type: 'LOAD_FROM_STORAGE', payload: parsedState });
-      } catch (e) {
-        console.error('Failed to load app state:', e);
+    // SSR-safe: check for window before using localStorage
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('habitpet-app-state');
+      if (saved) {
+        try {
+          const parsedState = JSON.parse(saved);
+          dispatch({ type: 'LOAD_FROM_STORAGE', payload: parsedState });
+        } catch (e) {
+          console.error('Failed to load app state:', e);
+        }
       }
     }
   }, []);
 
   // Save state to localStorage whenever it changes (for offline support)
   useEffect(() => {
-    localStorage.setItem('habitpet-app-state', JSON.stringify(state));
+    // SSR-safe: check for window before using localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('habitpet-app-state', JSON.stringify(state));
+    }
   }, [state]);
 
   const getUserId = () => userIdRef.current;
 
-  const addFoodLog = async (foodLogData: Omit<FoodLog, 'id' | 'user_id' | 'created_at'>) => {
+  const addFoodLog = async (foodLogData: Omit<FoodLog, 'id' | 'user_id' | 'created_at'>): Promise<void> => {
     const userId = userIdRef.current;
     console.log(`[DemoContext] Saving food log to Supabase for user: ${userId}`, foodLogData);
     
@@ -262,7 +285,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       
       // Update local state with the saved log (includes database ID)
       dispatch({ type: 'ADD_FOOD_LOG', payload: savedLog });
-      return savedLog; // Return saved log for success handling
     } catch (error) {
       console.error('[DemoContext] ❌ Failed to save food log to database:', error);
       // Fallback: save to local state only (for offline support)
@@ -312,7 +334,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const resetApp = () => {
     dispatch({ type: 'RESET_DEMO' });
-    localStorage.removeItem('habitpet-app-state');
+    // SSR-safe: check for window before using localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('habitpet-app-state');
+    }
     // Note: We don't remove the user ID so the user keeps their identity
   };
 
