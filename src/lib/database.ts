@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { User, UserPreferences, FoodLog, UserProgress, DietaryPreference, FoodPreference, NutritionGoal } from '@/types';
+import { foodLogger } from '@forki/features';
 
 export class DatabaseService {
   // User operations
@@ -85,64 +86,43 @@ export class DatabaseService {
   }
 
   // Food log operations
-  static async createFoodLog(foodLog: Omit<FoodLog, 'id' | 'created_at'>) {
-    const { data, error } = await supabase
-      .from('food_logs')
-      .insert([foodLog])
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+  // Uses @forki/features foodLogger for modularity
+  static async createFoodLog(foodLog: Omit<FoodLog, 'id' | 'created_at'>): Promise<FoodLog> {
+    // Use foodLogger from @forki/features package
+    const saved = await foodLogger.saveLog(foodLog);
+    // Ensure id and created_at are present (database always returns them)
+    if (!saved.id || !saved.created_at) {
+      throw new Error('Database did not return id or created_at for food log');
+    }
+    // Cast to local FoodLog type (id and created_at are required)
+    return saved as FoodLog;
   }
 
-  static async getFoodLogs(userId: string, limit?: number, offset?: number) {
-    let query = supabase
-      .from('food_logs')
-      .select('*')
-      .eq('user_id', userId)
-      .order('logged_at', { ascending: false });
-
-    if (limit) query = query.limit(limit);
-    if (offset) query = query.range(offset, offset + (limit || 10) - 1);
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data;
+  static async getFoodLogs(userId: string, limit?: number, offset?: number): Promise<FoodLog[]> {
+    // Use foodLogger from @forki/features package
+    const logs = await foodLogger.getLogs(userId, limit, offset);
+    // Ensure all logs have required id and created_at (database always returns them)
+    return logs.map(log => {
+      if (!log.id || !log.created_at) {
+        throw new Error('Database returned food log without id or created_at');
+      }
+      return log as FoodLog;
+    });
   }
 
   static async getFoodLogsByDateRange(userId: string, startDate: string, endDate: string) {
-    const { data, error } = await supabase
-      .from('food_logs')
-      .select('*')
-      .eq('user_id', userId)
-      .gte('logged_at', startDate)
-      .lte('logged_at', endDate)
-      .order('logged_at', { ascending: false });
-
-    if (error) throw error;
-    return data;
+    // Use foodLogger from @forki/features package
+    return await foodLogger.getLogsByDateRange(startDate, endDate, userId);
   }
 
   static async updateFoodLog(logId: string, updates: Partial<FoodLog>) {
-    const { data, error } = await supabase
-      .from('food_logs')
-      .update(updates)
-      .eq('id', logId)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    // Use foodLogger from @forki/features package
+    return await foodLogger.updateLog(logId, updates);
   }
 
   static async deleteFoodLog(logId: string) {
-    const { error } = await supabase
-      .from('food_logs')
-      .delete()
-      .eq('id', logId);
-
-    if (error) throw error;
+    // Use foodLogger from @forki/features package
+    await foodLogger.deleteLog(logId);
   }
 
   // User progress operations
