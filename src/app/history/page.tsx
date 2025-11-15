@@ -131,15 +131,33 @@ export default function HistoryPage() {
                       {logs
                         .sort((a, b) => new Date(b.logged_at).getTime() - new Date(a.logged_at).getTime())
                         .map((log) => (
-                          <div key={log.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <span className="text-2xl">{log.emoji}</span>
-                              <div>
-                                <p className="font-medium">{log.food_type}</p>
-                                <p className="text-sm text-gray-500">{log.portion_size} • {formatTime(log.logged_at)}</p>
+                          <div key={log.id} className="p-3 bg-gray-50 rounded-lg space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <span className="text-2xl">{log.emoji}</span>
+                                <div>
+                                  <p className="font-medium">{log.food_type}</p>
+                                  <p className="text-sm text-gray-500">{log.portion_size} • {formatTime(log.logged_at)}</p>
+                                </div>
                               </div>
+                              <span className="font-semibold text-green-600">{log.calories} cal</span>
                             </div>
-                            <span className="font-semibold text-green-600">{log.calories} cal</span>
+                            {log.protein_g !== undefined && log.carbs_g !== undefined && log.fat_g !== undefined && (
+                              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-200">
+                                <div className="text-center">
+                                  <p className="text-xs text-gray-600">Protein</p>
+                                  <p className="text-sm font-bold text-blue-600">{log.protein_g}g</p>
+                                </div>
+                                <div className="text-center">
+                                  <p className="text-xs text-gray-600">Carbs</p>
+                                  <p className="text-sm font-bold text-green-600">{log.carbs_g}g</p>
+                                </div>
+                                <div className="text-center">
+                                  <p className="text-xs text-gray-600">Fat</p>
+                                  <p className="text-sm font-bold text-yellow-600">{log.fat_g}g</p>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         ))}
                     </CardContent>

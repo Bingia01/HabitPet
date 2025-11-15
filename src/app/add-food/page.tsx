@@ -19,6 +19,13 @@ interface FoodData {
   calories: number;
   portion: string;
   portionMultiplier: number;
+  macros?: {
+    proteinG: number;
+    carbsG: number;
+    fatG: number;
+    fiberG?: number;
+  };
+  weight?: number;
 }
 
 export default function AddFoodPage() {
@@ -49,6 +56,8 @@ export default function AddFoodPage() {
         calories: foodAnalysis.calories,
         portion: 'Standard serving',
         portionMultiplier: 1,
+        macros: foodAnalysis.macros,
+        weight: foodAnalysis.weight,
       }));
       
       // Close camera and show confirmation
@@ -87,25 +96,56 @@ export default function AddFoodPage() {
     }
   };
 
-  const confirmLog = () => {
+  const [isSaving, setIsSaving] = useState(false);
+
+  const confirmLog = async () => {
     const totalCalories = Math.round(foodData.calories * foodData.portionMultiplier);
+    
+    // Calculate macros with portion multiplier
+    const macros = foodData.macros
+      ? {
+          proteinG: Math.round(foodData.macros.proteinG * foodData.portionMultiplier * 10) / 10,
+          carbsG: Math.round(foodData.macros.carbsG * foodData.portionMultiplier * 10) / 10,
+          fatG: Math.round(foodData.macros.fatG * foodData.portionMultiplier * 10) / 10,
+          fiberG: foodData.macros.fiberG ? Math.round(foodData.macros.fiberG * foodData.portionMultiplier * 10) / 10 : undefined,
+        }
+      : undefined;
 
-    // Add food log to demo state
-    addFoodLog({
-      food_type: foodData.name,
-      ingredients: [foodData.name.toLowerCase()],
-      portion_size: foodData.portion,
-      calories: totalCalories,
-      emoji: foodData.emoji,
-      logged_at: new Date().toISOString(),
-    });
+    setIsSaving(true);
+    try {
+      // Add food log to Supabase (async)
+      const savedLog = await addFoodLog({
+        food_type: foodData.name,
+        ingredients: [foodData.name.toLowerCase()],
+        portion_size: foodData.portion,
+        calories: totalCalories,
+        emoji: foodData.emoji,
+        logged_at: new Date().toISOString(),
+        weight_g: foodData.weight ? Math.round(foodData.weight * foodData.portionMultiplier) : undefined,
+        protein_g: macros?.proteinG,
+        carbs_g: macros?.carbsG,
+        fat_g: macros?.fatG,
+        fiber_g: macros?.fiberG,
+      });
 
-    // Feed the pet and make it happy!
-    feedPet(totalCalories);
-    updateMood('excited');
+      console.log('✅ Food log saved successfully:', savedLog);
 
-    // Redirect to main page with success message
-    router.push('/?logged=true');
+      // Feed the pet and make it happy!
+      feedPet(totalCalories);
+      updateMood('excited');
+
+      // Redirect to main page with success message
+      router.push('/dashboard?logged=true');
+    } catch (error) {
+      console.error('❌ Failed to save food log:', error);
+      // Still feed the pet and redirect, but log the error
+      feedPet(totalCalories);
+      updateMood('excited');
+      // Show error in URL so dashboard can display it
+      router.push('/dashboard?logged=true&error=saving');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const goBack = () => {
@@ -254,8 +294,16 @@ export default function AddFoodPage() {
                 onClick={confirmLog}
                 className="w-full bg-teal-500 hover:bg-teal-600 text-white"
                 size="lg"
+                disabled={isSaving}
               >
-                Log Food! 🎉
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Log Food! 🎉'
+                )}
               </Button>
             </CardContent>
           </Card>

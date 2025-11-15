@@ -49,6 +49,11 @@ export type Database = {
           emoji: string;
           logged_at: string;
           created_at: string;
+          weight_g?: number;
+          protein_g?: number;
+          carbs_g?: number;
+          fat_g?: number;
+          fiber_g?: number;
         };
         Insert: Omit<Database['public']['Tables']['food_logs']['Row'], 'id' | 'created_at'>;
         Update: Partial<Database['public']['Tables']['food_logs']['Insert']>;

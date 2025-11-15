@@ -17,6 +17,12 @@ export type AnalyzeItem = {
     density: { mu: number; sigma: number };
   };
   evidence?: string[];
+  macros?: {
+    proteinG: number;
+    carbsG: number;
+    fatG: number;
+    fiberG?: number;
+  };
 };
 
 export type AnalyzeOutput = {

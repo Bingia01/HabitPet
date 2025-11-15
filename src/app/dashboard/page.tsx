@@ -21,11 +21,18 @@ function DashboardContent() {
 
   // Check for food logging feedback
   useEffect(() => {
-    if (searchParams.get('logged') === 'true') {
+    const logged = searchParams.get('logged');
+    const error = searchParams.get('error');
+    
+    if (logged === 'true') {
       const latestLog = state.foodLogs[state.foodLogs.length - 1];
       if (latestLog) {
-        const message = getFeedbackMessage(latestLog.calories);
-        setFeedbackMessage(message);
+        if (error === 'saving') {
+          setFeedbackMessage('⚠️ Food logged locally (offline mode)');
+        } else {
+          const message = getFeedbackMessage(latestLog.calories);
+          setFeedbackMessage(message);
+        }
         setShowFeedback(true);
 
         // Clear feedback after 3 seconds
@@ -180,18 +187,72 @@ function DashboardContent() {
                   .slice(-3)
                   .reverse()
                   .map((log) => (
-                    <div key={log.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">{log.emoji}</span>
-                        <span className="text-sm font-medium">{log.food_type}</span>
+                    <div key={log.id} className="p-2 bg-gray-50 rounded space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{log.emoji}</span>
+                          <span className="text-sm font-medium">{log.food_type}</span>
+                        </div>
+                        <span className="text-sm text-teal-600 font-semibold">{log.calories} cal</span>
                       </div>
-                      <span className="text-sm text-teal-600 font-semibold">{log.calories} cal</span>
+                      {log.protein_g !== undefined && log.carbs_g !== undefined && log.fat_g !== undefined && (
+                        <div className="grid grid-cols-3 gap-1 text-xs">
+                          <div className="text-center">
+                            <span className="text-blue-600 font-semibold">P: {log.protein_g}g</span>
+                          </div>
+                          <div className="text-center">
+                            <span className="text-green-600 font-semibold">C: {log.carbs_g}g</span>
+                          </div>
+                          <div className="text-center">
+                            <span className="text-yellow-600 font-semibold">F: {log.fat_g}g</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
               </div>
             </CardContent>
           </Card>
         )}
+
+        {/* Daily Macro Totals */}
+        {state.foodLogs.length > 0 && (() => {
+          const todayLogs = state.foodLogs.filter(log => {
+            const today = new Date();
+            const logDate = new Date(log.logged_at);
+            return logDate.toDateString() === today.toDateString();
+          });
+          const dailyMacros = todayLogs.reduce((acc, log) => ({
+            protein: acc.protein + (log.protein_g ?? 0),
+            carbs: acc.carbs + (log.carbs_g ?? 0),
+            fat: acc.fat + (log.fat_g ?? 0),
+          }), { protein: 0, carbs: 0, fat: 0 });
+          const hasMacros = todayLogs.some(log => log.protein_g !== undefined);
+          
+          return hasMacros ? (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm text-gray-600">Today's Macros</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center p-3 bg-blue-50 rounded-lg">
+                    <p className="text-xs text-gray-600 mb-1">Protein</p>
+                    <p className="text-lg font-bold text-blue-600">{Math.round(dailyMacros.protein * 10) / 10}g</p>
+                  </div>
+                  <div className="text-center p-3 bg-green-50 rounded-lg">
+                    <p className="text-xs text-gray-600 mb-1">Carbs</p>
+                    <p className="text-lg font-bold text-green-600">{Math.round(dailyMacros.carbs * 10) / 10}g</p>
+                  </div>
+                  <div className="text-center p-3 bg-yellow-50 rounded-lg">
+                    <p className="text-xs text-gray-600 mb-1">Fat</p>
+                    <p className="text-lg font-bold text-yellow-600">{Math.round(dailyMacros.fat * 10) / 10}g</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : null;
+        })()}
 
         {/* Add Food Button */}
         <div className="fixed bottom-20 right-4">

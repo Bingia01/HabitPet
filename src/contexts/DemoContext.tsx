@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react';
 import { User, UserPreferences, FoodLog, UserProgress } from '@/types';
 import { calculateAvatarState } from '@/lib/avatar-logic';
+import { DatabaseService } from '@/lib/database';
 
 interface DemoState {
   user: User | null;
@@ -23,11 +24,12 @@ type DemoAction =
 interface AppContextType {
   state: DemoState;
   dispatch: React.Dispatch<DemoAction>;
-  addFoodLog: (foodLog: Omit<FoodLog, 'id' | 'user_id' | 'created_at'>) => void;
+  addFoodLog: (foodLog: Omit<FoodLog, 'id' | 'user_id' | 'created_at'>) => Promise<void>;
   updatePreferences: (updates: Partial<UserPreferences>) => void;
   updateUser: (updates: Partial<User>) => void;
   completeOnboarding: (userData: Omit<User, 'id' | 'created_at' | 'updated_at'>, preferences: Omit<UserPreferences, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => void;
   resetApp: () => void;
+  getUserId: () => string;
 }
 
 const initialState: DemoState = {
@@ -38,61 +40,13 @@ const initialState: DemoState = {
   isOnboardingComplete: false,
 };
 
-// Generate some sample food logs for demo
+// Generate some sample food logs for demo (will be replaced by real data from Supabase)
 const generateSampleLogs = (): FoodLog[] => {
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  return [
-    {
-      id: '1',
-      user_id: 'demo-user',
-      food_type: 'Apple',
-      ingredients: ['apple'],
-      portion_size: 'Medium',
-      calories: 95,
-      emoji: '🍎',
-      logged_at: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 8, 30).toISOString(),
-      created_at: new Date().toISOString(),
-    },
-    {
-      id: '2',
-      user_id: 'demo-user',
-      food_type: 'Broccoli',
-      ingredients: ['broccoli'],
-      portion_size: 'Large',
-      calories: 55,
-      emoji: '🥦',
-      logged_at: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 15).toISOString(),
-      created_at: new Date().toISOString(),
-    },
-    {
-      id: '3',
-      user_id: 'demo-user',
-      food_type: 'Chicken',
-      ingredients: ['chicken breast'],
-      portion_size: 'Medium',
-      calories: 165,
-      emoji: '🍗',
-      logged_at: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 18, 45).toISOString(),
-      created_at: new Date().toISOString(),
-    },
-    {
-      id: '4',
-      user_id: 'demo-user',
-      food_type: 'Eggs',
-      ingredients: ['eggs'],
-      portion_size: 'Medium',
-      calories: 140,
-      emoji: '🥚',
-      logged_at: new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 7, 30).toISOString(),
-      created_at: new Date().toISOString(),
-    },
-  ];
+  // Return empty array - real logs will be loaded from Supabase
+  return [];
 };
 
-const calculateProgress = (foodLogs: FoodLog[], dailyGoal: number, weeklyGoal: number): UserProgress => {
+const calculateProgress = (foodLogs: FoodLog[], dailyGoal: number, weeklyGoal: number, userId: string): UserProgress => {
   const today = new Date();
   const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const weekStart = new Date(todayStart);
@@ -129,8 +83,8 @@ const calculateProgress = (foodLogs: FoodLog[], dailyGoal: number, weeklyGoal: n
   const avatarState = calculateAvatarState(avatarStats);
 
   return {
-    id: 'demo-progress',
-    user_id: 'demo-user',
+    id: `progress-${userId}`,
+    user_id: userId,
     current_streak: currentStreak,
     level,
     daily_progress: dailyProgress,
@@ -148,19 +102,21 @@ const demoReducer = (state: DemoState, action: DemoAction): DemoState => {
         user: action.payload.user,
         preferences: action.payload.preferences,
         isOnboardingComplete: true,
-        foodLogs: generateSampleLogs(),
+        foodLogs: generateSampleLogs().map(log => ({ ...log, user_id: action.payload.user.id })),
       };
       newState.progress = calculateProgress(
         newState.foodLogs,
         action.payload.preferences.daily_calorie_goal,
-        action.payload.preferences.weekly_calorie_goal
+        action.payload.preferences.weekly_calorie_goal,
+        action.payload.user.id
       );
       return newState;
 
     case 'ADD_FOOD_LOG':
       const updatedLogs = [...state.foodLogs, action.payload];
+      const userId = action.payload.user_id;
       const updatedProgress = state.preferences
-        ? calculateProgress(updatedLogs, state.preferences.daily_calorie_goal, state.preferences.weekly_calorie_goal)
+        ? calculateProgress(updatedLogs, state.preferences.daily_calorie_goal, state.preferences.weekly_calorie_goal, userId)
         : state.progress;
 
       return {
@@ -171,10 +127,12 @@ const demoReducer = (state: DemoState, action: DemoAction): DemoState => {
 
     case 'UPDATE_PREFERENCES':
       const updatedPreferences = { ...state.preferences!, ...action.payload };
+      const userIdForProgress = state.user?.id || 'demo-user';
       const recalculatedProgress = calculateProgress(
         state.foodLogs,
         updatedPreferences.daily_calorie_goal,
-        updatedPreferences.weekly_calorie_goal
+        updatedPreferences.weekly_calorie_goal,
+        userIdForProgress
       );
 
       return {
@@ -202,11 +160,75 @@ const demoReducer = (state: DemoState, action: DemoAction): DemoState => {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+// Generate or retrieve unique user ID
+const getOrCreateUserId = (): string => {
+  const STORAGE_KEY = 'forki-user-id';
+  let userId = localStorage.getItem(STORAGE_KEY);
+  
+  if (!userId) {
+    // Generate a UUID v4
+    userId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+    localStorage.setItem(STORAGE_KEY, userId);
+  }
+  
+  return userId;
+};
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(demoReducer, initialState);
+  const userIdRef = useRef<string>(getOrCreateUserId());
+  const hasLoadedFromSupabaseRef = useRef(false);
 
-  // Load state from localStorage on mount
+  // Load food logs from Supabase on mount
   useEffect(() => {
+    const loadFoodLogsFromSupabase = async () => {
+      if (hasLoadedFromSupabaseRef.current) return;
+      hasLoadedFromSupabaseRef.current = true;
+
+      const userId = userIdRef.current;
+      console.log(`[DemoContext] Loading food logs from Supabase for user: ${userId}`);
+
+      try {
+        const logs = await DatabaseService.getFoodLogs(userId, 100);
+        console.log(`[DemoContext] Loaded ${logs?.length || 0} food logs from Supabase`);
+        
+        if (logs && logs.length > 0) {
+          // Replace all logs with Supabase data (avoid duplicates)
+          // We'll dispatch a custom action to replace all logs at once
+          logs.forEach(log => {
+            dispatch({ type: 'ADD_FOOD_LOG', payload: log });
+          });
+          console.log(`[DemoContext] ✅ Successfully loaded ${logs.length} food logs from Supabase`);
+        } else {
+          console.log(`[DemoContext] No food logs found in Supabase for user ${userId}`);
+        }
+      } catch (error) {
+        console.error('[DemoContext] ❌ Failed to load food logs from Supabase:', error);
+        // Fallback to localStorage
+        const saved = localStorage.getItem('habitpet-app-state');
+        if (saved) {
+          try {
+            const parsedState = JSON.parse(saved);
+            dispatch({ type: 'LOAD_FROM_STORAGE', payload: parsedState });
+            console.log('[DemoContext] Loaded state from localStorage fallback');
+          } catch (e) {
+            console.error('[DemoContext] Failed to load app state from localStorage:', e);
+          }
+        }
+      }
+    };
+
+    loadFoodLogsFromSupabase();
+  }, []);
+
+  // Load state from localStorage on mount (as fallback)
+  useEffect(() => {
+    if (hasLoadedFromSupabaseRef.current) return; // Skip if already loaded from Supabase
+    
     const saved = localStorage.getItem('habitpet-app-state');
     if (saved) {
       try {
@@ -218,19 +240,42 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Save state to localStorage whenever it changes
+  // Save state to localStorage whenever it changes (for offline support)
   useEffect(() => {
     localStorage.setItem('habitpet-app-state', JSON.stringify(state));
   }, [state]);
 
-  const addFoodLog = (foodLogData: Omit<FoodLog, 'id' | 'user_id' | 'created_at'>) => {
-    const foodLog: FoodLog = {
-      ...foodLogData,
-      id: Date.now().toString(),
-      user_id: 'demo-user',
-      created_at: new Date().toISOString(),
-    };
-    dispatch({ type: 'ADD_FOOD_LOG', payload: foodLog });
+  const getUserId = () => userIdRef.current;
+
+  const addFoodLog = async (foodLogData: Omit<FoodLog, 'id' | 'user_id' | 'created_at'>) => {
+    const userId = userIdRef.current;
+    console.log(`[DemoContext] Saving food log to Supabase for user: ${userId}`, foodLogData);
+    
+    try {
+      // Save to Supabase first
+      const savedLog = await DatabaseService.createFoodLog({
+        ...foodLogData,
+        user_id: userId,
+      });
+      
+      console.log(`[DemoContext] ✅ Food log saved successfully to Supabase:`, savedLog);
+      
+      // Update local state with the saved log (includes database ID)
+      dispatch({ type: 'ADD_FOOD_LOG', payload: savedLog });
+      return savedLog; // Return saved log for success handling
+    } catch (error) {
+      console.error('[DemoContext] ❌ Failed to save food log to database:', error);
+      // Fallback: save to local state only (for offline support)
+      const foodLog: FoodLog = {
+        ...foodLogData,
+        id: Date.now().toString(),
+        user_id: userId,
+        created_at: new Date().toISOString(),
+      };
+      dispatch({ type: 'ADD_FOOD_LOG', payload: foodLog });
+      console.warn('[DemoContext] ⚠️ Saved to local state only (offline mode)');
+      throw error; // Re-throw so caller can handle it
+    }
   };
 
   const updatePreferences = (updates: Partial<UserPreferences>) => {
@@ -245,17 +290,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     userData: Omit<User, 'id' | 'created_at' | 'updated_at'>,
     preferencesData: Omit<UserPreferences, 'id' | 'user_id' | 'created_at' | 'updated_at'>
   ) => {
+    const userId = userIdRef.current;
+    
     const user: User = {
       ...userData,
-      id: 'demo-user',
+      id: userId,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
     const preferences: UserPreferences = {
       ...preferencesData,
-      id: 'demo-preferences',
-      user_id: 'demo-user',
+      id: `preferences-${userId}`,
+      user_id: userId,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -266,6 +313,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const resetApp = () => {
     dispatch({ type: 'RESET_DEMO' });
     localStorage.removeItem('habitpet-app-state');
+    // Note: We don't remove the user ID so the user keeps their identity
   };
 
   return (
@@ -278,6 +326,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         updateUser,
         completeOnboarding,
         resetApp,
+        getUserId,
       }}
     >
       {children}

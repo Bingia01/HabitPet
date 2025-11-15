@@ -37,6 +37,11 @@ export interface FoodLog {
   emoji: string;
   logged_at: string;
   created_at: string;
+  weight_g?: number;
+  protein_g?: number;
+  carbs_g?: number;
+  fat_g?: number;
+  fiber_g?: number;
 }
 
 export type AvatarState = 'sad' | 'neutral' | 'happy' | 'excited';
