@@ -170,10 +170,35 @@ function mapToLegacyResponse(result: AnalyzeOutput) {
   const foodName = topItem?.label ?? 'Food Item';
   const confidence = clamp(topItem?.confidence ?? 0.6, 0, 1);
 
-  const calories =
-    typeof topItem?.calories === 'number'
+  // Extract macros from the analyzer result
+  const macros = topItem?.macros
+    ? {
+        proteinG: Math.round(topItem.macros.proteinG * 10) / 10,
+        carbsG: Math.round(topItem.macros.carbsG * 10) / 10,
+        fatG: Math.round(topItem.macros.fatG * 10) / 10,
+        fiberG: topItem.macros.fiberG ? Math.round(topItem.macros.fiberG * 10) / 10 : undefined,
+      }
+    : undefined;
+
+  // Calculate calories: prioritize macros-based calculation (most accurate)
+  // Atwater factors: Protein 4 kcal/g, Carbs 4 kcal/g, Fat 9 kcal/g
+  let calories: number;
+  if (macros) {
+    const calculatedFromMacros = Math.round(macros.proteinG * 4 + macros.carbsG * 4 + macros.fatG * 9);
+    const caloriesFromItem = typeof topItem?.calories === 'number' ? Math.round(topItem.calories) : null;
+    
+    // Use macro-based calculation if it's more reasonable (at least 20 calories)
+    // or if item calories seem too low (< 20) compared to macros
+    if (calculatedFromMacros >= 20 && (!caloriesFromItem || caloriesFromItem < 20 || calculatedFromMacros > caloriesFromItem * 0.5)) {
+      calories = calculatedFromMacros;
+    } else {
+      calories = caloriesFromItem ?? estimateCalories(foodName);
+    }
+  } else {
+    calories = typeof topItem?.calories === 'number'
       ? Math.round(topItem.calories)
       : estimateCalories(foodName);
+  }
 
   const weight =
     typeof topItem?.weightGrams === 'number'
@@ -188,6 +213,7 @@ function mapToLegacyResponse(result: AnalyzeOutput) {
     emoji: getFoodEmoji(foodName),
     portionSizes: getPortionSizes(foodName),
     evidence: Array.from(new Set([...(topItem?.evidence ?? []), ...used])),
+    macros,
     meta: {
       used,
       latencyMs: result.meta?.latencyMs ?? null,
