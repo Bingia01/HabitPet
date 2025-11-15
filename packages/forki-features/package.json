@@ -1,0 +1,27 @@
+{
+  "name": "@forki/features",
+  "version": "1.0.0",
+  "description": "Modular food analysis and logging features for Forki",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "food",
+    "calorie",
+    "nutrition",
+    "analysis",
+    "logging"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.58.0"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
+
