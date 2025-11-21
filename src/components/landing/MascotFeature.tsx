@@ -9,17 +9,17 @@ export default function MascotFeature() {
   const mascotStates = [
     {
       video: "/mascots/Forki_Starving.mp4",
-      title: "Starving",
+      title: "Needs You",
       description: "When you haven't logged meals, your pet gets hungry and needs your attention!"
     },
     {
       video: "/mascots/Forki_Strong.mp4",
-      title: "Strong & Healthy",
+      title: "Thriving",
       description: "When you're consistent with logging and making healthy choices, your pet is strong and thriving!"
     },
     {
       video: "/mascots/Forki_Overfull.mp4",
-      title: "Overfull",
+      title: "Needs Balance",
       description: "When you've logged too much, your pet shows you the importance of balance."
     }
   ];
@@ -50,7 +50,7 @@ export default function MascotFeature() {
             </div>
             
             <div className="flex gap-3 justify-center">
-              {mascotStates.map((_, index) => (
+              {mascotStates.map((state, index) => (
                 <Button
                   key={index}
                   size="sm"
@@ -58,7 +58,7 @@ export default function MascotFeature() {
                   onClick={() => setSelectedState(index)}
                   className="rounded-full"
                 >
-                  State {index + 1}
+                  {state.title}
                 </Button>
               ))}
             </div>
