@@ -24,8 +24,8 @@ const nextConfig = {
 }
 
 module.exports = withSentryConfig(nextConfig, {
-  org: 'habit-pet',
-  project: 'habit-pet',
+  org: 'forki',
+  project: 'forki',
   silent: true,
   widenClientFileUpload: true,
   hideSourceMaps: true,

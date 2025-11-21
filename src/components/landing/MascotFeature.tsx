@@ -2,26 +2,25 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 
 export default function MascotFeature() {
   const [selectedState, setSelectedState] = useState(0);
   
   const mascotStates = [
     {
-      image: "/mascots/Happy_mascot_celebration_state_adc287c7.png",
-      title: "Happy & Thriving",
-      description: "When you're consistent with logging, your pet celebrates every milestone with you!"
+      video: "/mascots/Forki_Starving.mp4",
+      title: "Starving",
+      description: "When you haven't logged meals, your pet gets hungry and needs your attention!"
     },
     {
-      image: "/mascots/Motivated_mascot_energy_state_717dc3ff.png",
-      title: "Energized & Ready",
-      description: "During active streaks, your pet gets pumped up and motivates you to keep going."
+      video: "/mascots/Forki_Strong.mp4",
+      title: "Strong & Healthy",
+      description: "When you're consistent with logging and making healthy choices, your pet is strong and thriving!"
     },
     {
-      image: "/mascots/Growing_mascot_evolution_state_1ef81b37.png",
-      title: "Growing Stronger",
-      description: "Watch your pet evolve and level up as you build lasting healthy habits."
+      video: "/mascots/Forki_Overfull.mp4",
+      title: "Overfull",
+      description: "When you've logged too much, your pet shows you the importance of balance."
     }
   ];
 
@@ -40,12 +39,13 @@ export default function MascotFeature() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="order-2 lg:order-1">
             <div className="bg-gradient-to-br from-primary/10 to-accent/20 rounded-3xl p-8 mb-8">
-              <Image 
-                src={mascotStates[selectedState].image} 
-                alt={mascotStates[selectedState].title}
-                width={400}
-                height={400}
-                className="w-full max-w-md mx-auto"
+              <video 
+                src={mascotStates[selectedState].video} 
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full max-w-md mx-auto rounded-lg"
               />
             </div>
             

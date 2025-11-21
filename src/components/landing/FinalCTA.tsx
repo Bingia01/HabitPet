@@ -59,7 +59,7 @@ export default function FinalCTA() {
 
             <div className="flex justify-center">
               <Image 
-                src="/mascots/Happy_mascot_celebration_state_adc287c7.png"
+                src="/mascots/Footer_Forki.png"
                 alt="Happy Forki mascot welcoming you"
                 width={300}
                 height={300}

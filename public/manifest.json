@@ -1,6 +1,6 @@
 {
-  "name": "HabitPet - Nutrition Tracker",
-  "short_name": "HabitPet",
+  "name": "Forki - Nutrition Tracker",
+  "short_name": "Forki",
   "description": "Track your nutrition and care for your virtual pet",
   "start_url": "/",
   "display": "standalone",

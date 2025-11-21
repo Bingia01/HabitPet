@@ -4,13 +4,10 @@ import { ArrowRight, Download, Sparkles, Heart, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import CountUp from "react-countup";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 export default function HeroSectionV2() {
   const router = useRouter();
-  const [mascotState, setMascotState] = useState<"happy" | "motivated">("happy");
 
   const handleWebAppClick = () => {
     router.push('/onboarding');
@@ -225,36 +222,18 @@ export default function HeroSectionV2() {
             {/* Interactive mascot container */}
             <motion.div
               animate={mascotAnimation}
-              className="relative bg-white/10 backdrop-blur-lg rounded-2xl p-6 border-2 border-white/30 shadow-2xl cursor-pointer"
-              onHoverStart={() => setMascotState("motivated")}
-              onHoverEnd={() => setMascotState("happy")}
+              className="relative bg-white/10 backdrop-blur-lg rounded-2xl p-6 border-2 border-white/30 shadow-2xl"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Image
-                src={mascotState === "happy" ? "/mascots/Happy_mascot_celebration_state_adc287c7.png" : "/mascots/Motivated_mascot_energy_state_717dc3ff.png"}
-                alt="Forki mascot"
-                width={400}
-                height={400}
-                className="w-full h-auto transition-all duration-500"
+              <video
+                src="/mascots/Forki_intro.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-auto rounded-lg"
               />
-
-              {/* Mascot state indicator */}
-              <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    mascotState === "happy" ? "bg-green-500 animate-pulse" : "bg-orange-500 animate-pulse"
-                  }`}
-                />
-                <span className="text-xs font-bold text-gray-900">
-                  {mascotState === "happy" ? "Happy" : "Motivated"}
-                </span>
-              </div>
-
-              {/* Hover instruction */}
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-gray-900/80 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full">
-                Hover to see me energized!
-              </div>
             </motion.div>
 
             {/* Floating badges around mascot (Nintendo-inspired) */}

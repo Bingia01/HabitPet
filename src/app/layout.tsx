@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Fredoka } from "next/font/google";
 import "./globals.css";
-import { DemoProvider } from "@/contexts/DemoContext";
-import { PetProvider } from "@/contexts/PetContext";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 
 const geistSans = Geist({
@@ -32,7 +30,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://habitpet.app",
+    url: "https://forki.app",
     title: "Forki - Your Pet, Your Progress",
     description: "Track meals in 15 seconds. Watch your adorable Forki grow.",
     siteName: "Forki",
@@ -46,7 +44,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'HabitPet',
+    title: 'Forki',
   },
   formatDetection: {
     telephone: false,
@@ -84,11 +82,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${fredoka.variable} antialiased`}
       >
-        <PetProvider>
-          <DemoProvider>
-            {children}
-          </DemoProvider>
-        </PetProvider>
+        {children}
       </body>
     </html>
   );

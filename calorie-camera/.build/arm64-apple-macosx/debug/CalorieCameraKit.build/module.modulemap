@@ -1,4 +1,0 @@
-module CalorieCameraKit {
-    header "/Users/wutthichaiupatising/habit_pet/calorie-camera/.build/arm64-apple-macosx/debug/CalorieCameraKit.build/CalorieCameraKit-Swift.h"
-    requires objc
-}
