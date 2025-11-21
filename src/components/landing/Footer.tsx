@@ -33,7 +33,7 @@ export default function Footer() {
                 onClick={() => console.log("Instagram clicked")}
                 className="rounded-full"
               >
-                <SiInstagram className="w-5 h-5" />
+                <SiInstagram className="w-5 h-5 text-white" />
               </Button>
               <Button 
                 size="icon" 
@@ -41,7 +41,7 @@ export default function Footer() {
                 onClick={() => console.log("TikTok clicked")}
                 className="rounded-full"
               >
-                <SiTiktok className="w-5 h-5" />
+                <SiTiktok className="w-5 h-5 text-white" />
               </Button>
               <Button 
                 size="icon" 
@@ -49,7 +49,7 @@ export default function Footer() {
                 onClick={() => console.log("X clicked")}
                 className="rounded-full"
               >
-                <SiX className="w-5 h-5" />
+                <SiX className="w-5 h-5 text-white" />
               </Button>
             </div>
           </div>
@@ -82,14 +82,14 @@ export default function Footer() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="rounded-full"
+                className="rounded-full text-white placeholder:text-white/70 border-white/30 bg-white/10 focus:border-white focus:bg-white/20"
               />
               <Button 
                 type="submit" 
                 size="icon"
                 className="rounded-full flex-shrink-0"
               >
-                <Mail className="w-4 h-4" />
+                <Mail className="w-4 h-4 text-white" />
               </Button>
             </form>
           </div>
