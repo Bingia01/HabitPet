@@ -10,16 +10,19 @@ export default function MascotFeature() {
     {
       video: "/mascots/Forki_Starving.mp4",
       title: "Needs You",
+      buttonLabel: "Starving",
       description: "When you haven't logged meals, your pet gets hungry and needs your attention!"
     },
     {
       video: "/mascots/Forki_Strong.mp4",
       title: "Thriving",
+      buttonLabel: "Strong",
       description: "When you're consistent with logging and making healthy choices, your pet is strong and thriving!"
     },
     {
       video: "/mascots/Forki_Overfull.mp4",
       title: "Needs Balance",
+      buttonLabel: "Overfull",
       description: "When you've logged too much, your pet shows you the importance of balance."
     }
   ];
@@ -49,20 +52,20 @@ export default function MascotFeature() {
               />
             </div>
             
-            <div className="flex gap-3 justify-center">
+            <div className="flex gap-4 justify-center">
               {mascotStates.map((state, index) => (
                 <Button
                   key={index}
-                  size="sm"
+                  size="default"
                   variant={selectedState === index ? "default" : "outline"}
                   onClick={() => setSelectedState(index)}
-                  className={`rounded-full ${
+                  className={`rounded-full px-6 py-3 text-base font-semibold ${
                     selectedState === index 
                       ? "bg-[#8DD4D1] text-[#0A1128] hover:bg-[#6FB8B5] border-[#7B68C4]" 
                       : "bg-[#1E2742]/60 text-[#E8E8F0] border-[#7B68C4]/40 hover:border-[#7B68C4]"
                   }`}
                 >
-                  {state.title}
+                  {state.buttonLabel}
                 </Button>
               ))}
             </div>
