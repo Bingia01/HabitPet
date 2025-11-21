@@ -101,12 +101,12 @@ export default function Footer() {
               © 2025 Forki. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
-              <button 
-                onClick={() => console.log("Privacy clicked")}
+              <a 
+                href="/privacy"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 Privacy Policy
-              </button>
+              </a>
               <button 
                 onClick={() => console.log("Terms clicked")}
                 className="text-muted-foreground hover:text-foreground transition-colors"
