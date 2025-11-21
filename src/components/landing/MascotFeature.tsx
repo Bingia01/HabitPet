@@ -25,20 +25,20 @@ export default function MascotFeature() {
   ];
 
   return (
-    <section className="py-24 bg-accent/30">
+    <section className="py-24 bg-[#1A2332]">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="font-playful text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
-            Meet Your New Best Friend
+          <h2 className="font-playful text-4xl md:text-5xl lg:text-6xl font-bold text-[#E8E8F0] mb-6">
+            Meet Your Forki
           </h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Unlike boring trackers, Forki gives you an adorable companion that lives, grows, and celebrates with you.
+          <p className="text-lg md:text-xl text-[#B8B8C8] max-w-2xl mx-auto">
+            Unlike boring trackers, Forki gives you a companion that grows, thrives, and celebrates every healthy choice with you.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="order-2 lg:order-1">
-            <div className="bg-gradient-to-br from-primary/10 to-accent/20 rounded-3xl p-8 mb-8">
+            <div className="bg-gradient-to-br from-[#1E2742]/80 to-[#2A3441]/60 rounded-3xl p-8 mb-8 border-2 border-[#7B68C4]/30">
               <video 
                 src={mascotStates[selectedState].video} 
                 autoPlay
@@ -56,7 +56,11 @@ export default function MascotFeature() {
                   size="sm"
                   variant={selectedState === index ? "default" : "outline"}
                   onClick={() => setSelectedState(index)}
-                  className="rounded-full"
+                  className={`rounded-full ${
+                    selectedState === index 
+                      ? "bg-[#8DD4D1] text-[#0A1128] hover:bg-[#6FB8B5] border-[#7B68C4]" 
+                      : "bg-[#1E2742]/60 text-[#E8E8F0] border-[#7B68C4]/40 hover:border-[#7B68C4]"
+                  }`}
                 >
                   {state.title}
                 </Button>
@@ -65,33 +69,33 @@ export default function MascotFeature() {
           </div>
 
           <div className="order-1 lg:order-2 space-y-8">
-            <div className="bg-background rounded-3xl p-8 shadow-lg">
-              <h3 className="font-playful text-2xl md:text-3xl font-bold text-foreground mb-4">
+            <div className="bg-[#1E2742]/85 rounded-3xl p-8 shadow-lg border-2 border-[#7B68C4]/30">
+              <h3 className="font-playful text-2xl md:text-3xl font-bold text-[#E8E8F0] mb-4">
                 {mascotStates[selectedState].title}
               </h3>
-              <p className="text-lg text-muted-foreground mb-6">
+              <p className="text-lg text-[#B8B8C8] mb-6">
                 {mascotStates[selectedState].description}
               </p>
-              <div className="bg-accent/20 rounded-2xl p-6 border-l-4 border-primary">
-                <p className="italic text-foreground">
-                  "The pet feature is genius! I actually look forward to logging my meals now. It's like having a Tamagotchi that rewards healthy habits!" 
+              <div className="bg-[#2A3441]/60 rounded-2xl p-6 border-l-4 border-[#8DD4D1]">
+                <p className="italic text-[#E8E8F0]">
+                  "The Forki feature is genius! I actually look forward to logging my meals now. It's like having a companion that rewards healthy habits!" 
                 </p>
-                <p className="text-sm text-muted-foreground mt-3">— Sarah, USC Student</p>
+                <p className="text-sm text-[#B8B8C8] mt-3">— Sarah, Forki User</p>
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-background rounded-2xl">
-                <div className="font-playful text-3xl font-bold text-primary">92%</div>
-                <div className="text-sm text-muted-foreground mt-1">Stay Engaged</div>
+              <div className="text-center p-4 bg-[#1E2742]/85 rounded-2xl border border-[#7B68C4]/20">
+                <div className="font-playful text-3xl font-bold text-[#8DD4D1]">92%</div>
+                <div className="text-sm text-[#B8B8C8] mt-1">Stay Engaged</div>
               </div>
-              <div className="text-center p-4 bg-background rounded-2xl">
-                <div className="font-playful text-3xl font-bold text-primary">14+</div>
-                <div className="text-sm text-muted-foreground mt-1">Day Streaks</div>
+              <div className="text-center p-4 bg-[#1E2742]/85 rounded-2xl border border-[#7B68C4]/20">
+                <div className="font-playful text-3xl font-bold text-[#8DD4D1]">14+</div>
+                <div className="text-sm text-[#B8B8C8] mt-1">Day Streaks</div>
               </div>
-              <div className="text-center p-4 bg-background rounded-2xl">
-                <div className="font-playful text-3xl font-bold text-primary">500K</div>
-                <div className="text-sm text-muted-foreground mt-1">Meals Logged</div>
+              <div className="text-center p-4 bg-[#1E2742]/85 rounded-2xl border border-[#7B68C4]/20">
+                <div className="font-playful text-3xl font-bold text-[#8DD4D1]">500K</div>
+                <div className="text-sm text-[#B8B8C8] mt-1">Meals Logged</div>
               </div>
             </div>
           </div>

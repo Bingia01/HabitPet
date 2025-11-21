@@ -23,14 +23,14 @@ export default function AppShowcase() {
   ];
 
   return (
-    <section className="py-24 bg-background">
+    <section className="py-24 bg-[#1A2332]">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="font-playful text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
+          <h2 className="font-playful text-4xl md:text-5xl lg:text-6xl font-bold text-[#E8E8F0] mb-6">
             Tracking Made Effortless
           </h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            No more tedious typing or database searching. Just tap, and your pet celebrates with you.
+          <p className="text-lg md:text-xl text-[#B8B8C8] max-w-2xl mx-auto">
+            No more tedious typing or database searching. Just tap, and your Forki celebrates with you.
           </p>
         </div>
 
@@ -38,19 +38,19 @@ export default function AppShowcase() {
           {callouts.map((callout, index) => (
             <Card 
               key={index}
-              className="p-8 hover:shadow-lg transition-all cursor-default border-border/50"
+              className="p-8 hover:shadow-lg transition-all cursor-default border-[#7B68C4]/30 bg-[#1E2742]/85 hover:border-[#7B68C4]"
             >
               <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
-                  <callout.icon className="w-8 h-8 text-primary" />
+                <div className="w-16 h-16 rounded-2xl bg-[#8DD4D1]/20 flex items-center justify-center mb-6 border border-[#7B68C4]/30">
+                  <callout.icon className="w-8 h-8 text-[#8DD4D1]" />
                 </div>
-                <h3 className="font-semibold text-xl text-foreground mb-3">
+                <h3 className="font-semibold text-xl text-[#E8E8F0] mb-3">
                   {callout.label}
                 </h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-[#B8B8C8] leading-relaxed">
                   {callout.description}
                 </p>
-                <CheckCircle className="w-6 h-6 text-primary mt-4" />
+                <CheckCircle className="w-6 h-6 text-[#8DD4D1] mt-4" />
               </div>
             </Card>
           ))}

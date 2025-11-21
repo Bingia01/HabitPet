@@ -12,8 +12,8 @@ import Footer from '@/components/landing/Footer';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen">
-      {/* V2 Hero - Nintendo/Tamagotchi/MyFitnessPal inspired */}
+    <div className="min-h-screen bg-[#0A1128]">
+      {/* Hero Section - Forki Theme */}
       <HeroSectionV2 />
 
       {/* Keep existing sections below for now */}

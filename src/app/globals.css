@@ -46,26 +46,27 @@
 
 :root {
   --radius: 0.5rem;
-  --background: 0 0% 100%;
-  --foreground: 220 15% 15%;
-  --card: 220 14% 96%;
-  --card-foreground: 220 15% 15%;
-  --card-border: 220 13% 91%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 220 15% 15%;
-  --primary: 150 65% 50%; /* Teal to match ForkiPromote */
-  --primary-foreground: 0 0% 100%;
-  --secondary: 210 100% 95%; /* Light blue */
-  --secondary-foreground: 220 15% 20%;
-  --muted: 220 12% 90%;
-  --muted-foreground: 220 10% 45%;
-  --accent: 35 100% 92%; /* Yellow accent to match ForkiPromote */
-  --accent-foreground: 35 80% 30%;
+  /* Forki Theme - Midnight/Navy Gamified */
+  --background: 220 40% 8%; /* #0A1128 Deep midnight blue */
+  --foreground: 240 15% 92%; /* #E8E8F0 Light text */
+  --card: 220 30% 15%; /* #1A2332 Surface */
+  --card-foreground: 240 15% 92%; /* #E8E8F0 */
+  --card-border: 250 35% 50%; /* #7B68C4 Purple border */
+  --popover: 220 30% 20%; /* #1E2742 Panel background */
+  --popover-foreground: 240 15% 92%;
+  --primary: 180 45% 60%; /* #8DD4D1 Mint cyan (Log Food action) */
+  --primary-foreground: 220 40% 8%;
+  --secondary: 220 30% 15%; /* #1A2332 Surface */
+  --secondary-foreground: 240 15% 92%;
+  --muted: 220 25% 20%; /* #2A3441 */
+  --muted-foreground: 240 10% 75%; /* #B8B8C8 Muted light gray */
+  --accent: 320 60% 85%; /* #F5C9E0 Pink (Recipes action) */
+  --accent-foreground: 220 40% 8%;
   --destructive: 0 84% 42%;
   --destructive-foreground: 0 84% 98%;
-  --border: 220 13% 91%;
-  --input: 220 13% 80%;
-  --ring: 168 76% 42%; /* Teal ring */
+  --border: 250 35% 50%; /* #7B68C4 Purple border */
+  --input: 220 25% 25%;
+  --ring: 180 45% 60%; /* #8DD4D1 Mint ring */
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -82,24 +83,26 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  /* Forki Theme - Midnight/Navy Gamified (same as root since we're dark-first) */
+  --background: 220 40% 8%; /* #0A1128 Deep midnight blue */
+  --foreground: 240 15% 92%; /* #E8E8F0 Light text */
+  --card: 220 30% 15%; /* #1A2332 Surface */
+  --card-foreground: 240 15% 92%;
+  --popover: 220 30% 20%; /* #1E2742 Panel background */
+  --popover-foreground: 240 15% 92%;
+  --primary: 180 45% 60%; /* #8DD4D1 Mint cyan */
+  --primary-foreground: 220 40% 8%;
+  --secondary: 220 30% 15%;
+  --secondary-foreground: 240 15% 92%;
+  --muted: 220 25% 20%;
+  --muted-foreground: 240 10% 75%; /* #B8B8C8 */
+  --accent: 320 60% 85%; /* #F5C9E0 Pink */
+  --accent-foreground: 220 40% 8%;
+  --destructive: 0 84% 42%;
+  --destructive-foreground: 0 84% 98%;
+  --border: 250 35% 50%; /* #7B68C4 Purple */
+  --input: 220 25% 25%;
+  --ring: 180 45% 60%; /* #8DD4D1 Mint */
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);

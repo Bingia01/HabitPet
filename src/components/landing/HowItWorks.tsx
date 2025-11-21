@@ -7,7 +7,7 @@ export default function HowItWorks() {
     {
       number: 1,
       icon: Smartphone,
-      title: "Open the App",
+      title: "Open Forki",
       description: "Launch Forki whenever you eat. No need to create an account or set complex goals."
     },
     {
@@ -19,14 +19,14 @@ export default function HowItWorks() {
     {
       number: 3,
       icon: Heart,
-      title: "Your Pet Reacts",
-      description: "Watch your adorable companion celebrate, grow stronger, and cheer you on!"
+      title: "Your Forki Reacts",
+      description: "Watch your Forki celebrate, grow stronger, and cheer you on!"
     },
     {
       number: 4,
       icon: TrendingUp,
       title: "Build Your Streak",
-      description: "Consistency unlocks rewards, levels up your pet, and creates lasting habits."
+      description: "Consistency unlocks rewards, levels up your Forki, and creates lasting habits."
     },
     {
       number: 5,
@@ -37,13 +37,13 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section className="py-24 bg-secondary">
+    <section className="py-24 bg-[#1A2332]">
       <div className="max-w-5xl mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="font-playful text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
+          <h2 className="font-playful text-4xl md:text-5xl lg:text-6xl font-bold text-[#E8E8F0] mb-6">
             How It Works
           </h2>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-[#B8B8C8] max-w-2xl mx-auto">
             Five simple steps to building healthier habits that actually stick.
           </p>
         </div>
@@ -58,20 +58,20 @@ export default function HowItWorks() {
             >
               <div className="flex-shrink-0">
                 <div className="relative">
-                  <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
-                    <step.icon className="w-10 h-10 text-primary-foreground" />
+                  <div className="w-20 h-20 rounded-2xl bg-[#8DD4D1] flex items-center justify-center shadow-lg border-2 border-[#7B68C4]">
+                    <step.icon className="w-10 h-10 text-[#0A1128]" />
                   </div>
-                  <div className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-accent flex items-center justify-center font-playful font-bold text-accent-foreground border-4 border-secondary">
+                  <div className="absolute -top-2 -right-2 w-10 h-10 rounded-full bg-[#F5C9E0] flex items-center justify-center font-playful font-bold text-[#0A1128] border-4 border-[#1A2332]">
                     {step.number}
                   </div>
                 </div>
               </div>
 
-              <div className="flex-1 bg-background rounded-3xl p-8 shadow-md">
-                <h3 className="font-playful text-2xl font-bold text-foreground mb-3">
+              <div className="flex-1 bg-[#1E2742]/85 rounded-3xl p-8 shadow-md border-2 border-[#7B68C4]/30">
+                <h3 className="font-playful text-2xl font-bold text-[#E8E8F0] mb-3">
                   {step.title}
                 </h3>
-                <p className="text-lg text-muted-foreground leading-relaxed">
+                <p className="text-lg text-[#B8B8C8] leading-relaxed">
                   {step.description}
                 </p>
               </div>
