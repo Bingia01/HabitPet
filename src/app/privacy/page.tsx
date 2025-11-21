@@ -73,7 +73,7 @@ export default function PrivacyPolicyPage() {
           <ul className="list-disc list-inside space-y-2 mb-4 ml-4 text-foreground">
             <li>Device location or GPS</li>
             <li>Contacts, messages, or personal files</li>
-            <li>Photo library (unless you manually select an image)</li>
+            <li>Photos or your photo library</li>
             <li>Payment or financial information</li>
             <li>Biometric identifiers</li>
             <li>HealthKit data</li>
