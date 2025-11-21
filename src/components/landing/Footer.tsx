@@ -107,12 +107,12 @@ export default function Footer() {
               >
                 Privacy Policy
               </a>
-              <button 
-                onClick={() => console.log("Terms clicked")}
+              <a 
+                href="/terms"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 Terms of Service
-              </button>
+              </a>
             </div>
           </div>
         </div>
