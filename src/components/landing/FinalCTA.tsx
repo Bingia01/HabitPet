@@ -29,7 +29,7 @@ export default function FinalCTA() {
                 Start Your Forki Journey Today
               </h2>
               <p className="text-lg text-[#B8B8C8] mb-8">
-                Join thousands of users who've made tracking effortless. Your Forki companion is waiting!
+                Join thousands of users who&apos;ve made tracking effortless. Your Forki companion is waiting!
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4">

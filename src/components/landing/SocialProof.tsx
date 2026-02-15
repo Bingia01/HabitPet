@@ -77,7 +77,7 @@ export default function SocialProof() {
                   ))}
                 </div>
                 <p className="text-base text-[#E8E8F0] mb-6 leading-relaxed">
-                  "{testimonial.quote}"
+                  &ldquo;{testimonial.quote}&rdquo;
                 </p>
                 <div className="flex items-center gap-3">
                   <Avatar className="w-12 h-12">

@@ -22,7 +22,7 @@ export default function PrivacyPolicyPage() {
         {/* Introduction */}
         <div className="mb-8 pb-6 border-b border-[#7B68C4]/30">
           <p className="text-[#E8E8F0] leading-relaxed">
-            Your privacy is important to us. This Privacy Policy explains how Forki ("we," "us," or "our") collects, uses, and protects personal information. By using the Forki mobile application, you agree to the practices described below.
+            Your privacy is important to us. This Privacy Policy explains how Forki (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;) collects, uses, and protects personal information. By using the Forki mobile application, you agree to the practices described below.
           </p>
         </div>
 
@@ -92,7 +92,7 @@ export default function PrivacyPolicyPage() {
             <li>Generating your Wellness Snapshot and recommendations</li>
             <li>Tracking meals, calories, and macronutrients</li>
             <li>Supporting habit-building features such as streaks and consistency tracking</li>
-            <li>Powering your Forki companion's responses</li>
+            <li>Powering your Forki companion&apos;s responses</li>
             <li>Improving the overall functionality of the app</li>
           </ul>
           <p className="text-[#E8E8F0] mb-4 leading-relaxed">
@@ -147,7 +147,7 @@ export default function PrivacyPolicyPage() {
         {/* Section 6 */}
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-[#E8E8F0] mb-4">
-            6. Children's Privacy
+            6. Children&apos;s Privacy
           </h2>
           <p className="text-[#E8E8F0] mb-4 leading-relaxed">
             Forki is intended for individuals aged 13 and older.

@@ -22,7 +22,7 @@ export default function TermsOfServicePage() {
         {/* Introduction */}
         <div className="mb-8 pb-6 border-b border-[#7B68C4]/30">
           <p className="text-[#E8E8F0] leading-relaxed">
-            By using Forki (the "App"), you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with these terms, you may not use Forki. The materials and content within Forki are protected by applicable copyright and trademark law.
+            By using Forki (the &ldquo;App&rdquo;), you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with these terms, you may not use Forki. The materials and content within Forki are protected by applicable copyright and trademark law.
           </p>
         </div>
 
@@ -52,7 +52,7 @@ export default function TermsOfServicePage() {
             <li>Use the App for commercial purposes or public display.</li>
             <li>Attempt to reverse engineer, decompile, or extract source code from the App.</li>
             <li>Remove copyright or proprietary notices.</li>
-            <li>Transfer your access to another person or "mirror" the App elsewhere.</li>
+            <li>Transfer your access to another person or &ldquo;mirror&rdquo; the App elsewhere.</li>
           </ul>
           <p className="text-[#E8E8F0] mb-4 leading-relaxed">
             This license automatically terminates if you violate these terms. Upon termination, you must discontinue use of the App and delete any locally stored materials obtained through it.
@@ -65,7 +65,7 @@ export default function TermsOfServicePage() {
             3. Disclaimer
           </h2>
           <p className="text-[#E8E8F0] mb-4 leading-relaxed">
-            Forki is provided on an "as is" and "as available" basis. We make no warranties, expressed or implied, including without limitation:
+            Forki is provided on an &ldquo;as is&rdquo; and &ldquo;as available&rdquo; basis. We make no warranties, expressed or implied, including without limitation:
           </p>
           <ul className="list-disc list-inside space-y-2 mb-4 ml-4 text-[#B8B8C8]">
             <li>Warranties of merchantability</li>
