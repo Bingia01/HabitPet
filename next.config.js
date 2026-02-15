@@ -4,12 +4,10 @@ const { withSentryConfig } = require('@sentry/nextjs');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    // Disable ESLint during builds for now
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    // Disable TypeScript errors during builds for now
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   // PWA features are handled by manifest.json and service worker
   async redirects() {

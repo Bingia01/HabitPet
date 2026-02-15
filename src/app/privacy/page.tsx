@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
             Forki — Privacy Policy
           </h1>
           <p className="text-[#B8B8C8] italic">
-            Last Updated: November 2025
+            Last Updated: February 2026
           </p>
         </div>
 

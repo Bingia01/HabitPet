@@ -1,12 +1,8 @@
-// Service Worker for HabitPet
-const CACHE_NAME = 'habitpet-v1';
+// Service Worker for Forki
+const CACHE_NAME = 'forki-v1';
 const urlsToCache = [
   '/',
-  '/add-food',
-  '/history',
-  '/settings',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
+  '/landing',
   '/manifest.json'
 ];
 
@@ -14,28 +10,45 @@ const urlsToCache = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+      .then((cache) => cache.addAll(urlsToCache))
   );
 });
 
-// Fetch event
+// Activate event - clean up old caches
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) =>
+      Promise.all(
+        cacheNames
+          .filter((name) => name !== CACHE_NAME)
+          .map((name) => caches.delete(name))
+      )
+    )
+  );
+});
+
+// Fetch event - network first, fall back to cache
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
+        // Clone and cache successful responses
+        if (response && response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+        }
+        return response;
       })
+      .catch(() => caches.match(event.request))
   );
 });
 
 // Push event for notifications
 self.addEventListener('push', (event) => {
   const options = {
-    body: event.data ? event.data.text() : 'New notification from HabitPet!',
+    body: event.data ? event.data.text() : 'Time to log your meal!',
     icon: '/icon-192x192.png',
     badge: '/icon-192x192.png',
     vibrate: [100, 50, 100],
@@ -44,21 +57,13 @@ self.addEventListener('push', (event) => {
       primaryKey: 1
     },
     actions: [
-      {
-        action: 'explore',
-        title: 'Open App',
-        icon: '/icon-192x192.png'
-      },
-      {
-        action: 'close',
-        title: 'Close',
-        icon: '/icon-192x192.png'
-      }
+      { action: 'explore', title: 'Open App', icon: '/icon-192x192.png' },
+      { action: 'close', title: 'Close', icon: '/icon-192x192.png' }
     ]
   };
 
   event.waitUntil(
-    self.registration.showNotification('HabitPet', options)
+    self.registration.showNotification('Forki', options)
   );
 });
 
@@ -67,23 +72,6 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   if (event.action === 'explore') {
-    event.waitUntil(
-      clients.openWindow('/')
-    );
+    event.waitUntil(clients.openWindow('/'));
   }
 });
-
-// Background sync for offline data
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'background-sync') {
-    event.waitUntil(
-      // Sync offline data when connection is restored
-      syncOfflineData()
-    );
-  }
-});
-
-async function syncOfflineData() {
-  // Sync any offline food logs or user data
-  console.log('Syncing offline data...');
-}
