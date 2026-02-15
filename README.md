@@ -1,183 +1,103 @@
-# Supabase CLI
+# HabitPet
 
-[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
-](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
+A gamified nutrition tracking iOS app that pairs you with a virtual pet companion. Log your meals, hit your calorie goals, and watch your pet thrive.
 
-[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
+## What is HabitPet?
 
-This repository contains all the functionality for Supabase CLI.
+HabitPet turns healthy eating into a game. You adopt a virtual pet — choose from characters like Avo Friend, Boba Buddy, or Berry Sweet — and your pet's mood and appearance reflect how well you're eating. Stay on track and your pet is happy; skip meals or overeat and it shows.
 
-- [x] Running Supabase locally
-- [x] Managing database migrations
-- [x] Creating and deploying Supabase Functions
-- [x] Generating types directly from your database schema
-- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
+The app combines real nutritional data from the USDA FoodData Central database with an AI-powered camera that can detect food and estimate calories from a photo.
 
-## Getting started
+## Who is it for?
 
-### Install the CLI
+- Health-conscious individuals looking for a fun way to track nutrition
+- People who want calorie and macro tracking without the tedium
+- Anyone who's tried traditional food logging apps and lost motivation
 
-Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
+## Features
 
-```bash
-npm i supabase --save-dev
+### Virtual Pet Companion
+- 6 unique characters to choose from, each with their own personality
+- Pet mood changes in real time based on your daily nutrition progress
+- States range from sad (under 30% of goal) to strong (90-110%) to overfed (over 110%)
+
+### AI Camera
+- Take a photo of your food to automatically detect items and estimate calories
+- Powered by OpenAI Vision (GPT-4o-mini)
+- Advanced LiDAR-based 3D volume estimation on supported devices (iPhone 12 Pro+)
+- Three detection paths: nutrition label OCR, restaurant menu recognition, and geometric volume analysis
+
+### Nutrition Tracking
+- Search 300,000+ foods from the USDA FoodData Central database
+- Track calories, protein, carbs, and fats
+- Daily progress visualization with goal tracking
+- Historical food logging with timestamps
+
+### Onboarding
+- Guided setup: biometrics, dietary preferences, calorie goals
+- Character selection with preview
+- Notification opt-in for habit reminders
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| UI | SwiftUI (iOS 17+) |
+| Backend | Supabase (PostgreSQL + Edge Functions) |
+| AI | OpenAI Vision API (GPT-4o-mini) |
+| Food Data | USDA FoodData Central API |
+| Camera | CalorieCameraKit (custom Swift package) |
+| Depth | LiDAR + ARKit for 3D volume estimation |
+
+## Project Structure
+
+```
+HabitPet/                    # Main iOS app source
+  HabitPetApp.swift          # App entry point
+  HabitPetFlow.swift         # Navigation router
+  HomeScreen.swift           # Dashboard with pet + nutrition progress
+  FoodLoggerView.swift       # Food search and logging
+  AICameraView.swift         # Camera capture with OpenAI
+  CalorieCameraBridge.swift  # CalorieCameraKit integration
+  Models.swift               # Core data models
+  NutritionState.swift       # Reactive state management
+  USDAFoodService.swift      # USDA API client with caching
+
+CalorieCameraKit-v1.0.0/     # Camera + AI Swift package
+  CaptureKit/                # Photo capture + depth data
+  PerceptionKit/             # Food segmentation + volume estimation
+  NutritionKit/              # API integration
+  UXKit/                     # Camera UI components
+
+calorie-camera/              # Swift package (development version)
+calorie-camera-demo/         # Demo app for CalorieCameraKit
+supabase/                    # Edge functions + database config
 ```
 
-To install the beta release channel:
+## Getting Started
 
-```bash
-npm i supabase@beta --save-dev
-```
+### Prerequisites
+- Xcode 15+ with iOS 17 SDK
+- An Apple Developer account (for device testing)
+- Supabase project with Edge Functions deployed
+- OpenAI API key (for camera AI features)
+- USDA API key (for food search)
 
-When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
+### Build & Run
+1. Open `HabitPet.xcodeproj` in Xcode
+2. Copy `.env.local.example` to `.env.local` and fill in your API keys
+3. Select a simulator or connected device
+4. Build and run (Cmd+R)
 
-```
-NODE_OPTIONS=--no-experimental-fetch yarn add supabase
-```
+> LiDAR-based camera features require a physical device with LiDAR (iPhone 12 Pro or later).
 
-> **Note**
-For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
+## Other Branches
 
-<details>
-  <summary><b>macOS</b></summary>
+| Branch | Description |
+|--------|-------------|
+| `website` | Next.js/TypeScript landing page for the app |
+| `feature/food-logging-supabase` | Full-stack development branch with Supabase integration, tests, and additional features |
 
-  Available via [Homebrew](https://brew.sh). To install:
+## License
 
-  ```sh
-  brew install supabase/tap/supabase
-  ```
-
-  To install the beta release channel:
-  
-  ```sh
-  brew install supabase/tap/supabase-beta
-  brew link --overwrite supabase-beta
-  ```
-  
-  To upgrade:
-
-  ```sh
-  brew upgrade supabase
-  ```
-</details>
-
-<details>
-  <summary><b>Windows</b></summary>
-
-  Available via [Scoop](https://scoop.sh). To install:
-
-  ```powershell
-  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
-  scoop install supabase
-  ```
-
-  To upgrade:
-
-  ```powershell
-  scoop update supabase
-  ```
-</details>
-
-<details>
-  <summary><b>Linux</b></summary>
-
-  Available via [Homebrew](https://brew.sh) and Linux packages.
-
-  #### via Homebrew
-
-  To install:
-
-  ```sh
-  brew install supabase/tap/supabase
-  ```
-
-  To upgrade:
-
-  ```sh
-  brew upgrade supabase
-  ```
-
-  #### via Linux packages
-
-  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
-
-  ```sh
-  sudo apk add --allow-untrusted <...>.apk
-  ```
-
-  ```sh
-  sudo dpkg -i <...>.deb
-  ```
-
-  ```sh
-  sudo rpm -i <...>.rpm
-  ```
-
-  ```sh
-  sudo pacman -U <...>.pkg.tar.zst
-  ```
-</details>
-
-<details>
-  <summary><b>Other Platforms</b></summary>
-
-  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
-
-  ```sh
-  go install github.com/supabase/cli@latest
-  ```
-
-  Add a symlink to the binary in `$PATH` for easier access:
-
-  ```sh
-  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
-  ```
-
-  This works on other non-standard Linux distros.
-</details>
-
-<details>
-  <summary><b>Community Maintained Packages</b></summary>
-
-  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
-  To install in your working directory:
-
-  ```bash
-  pkgx install supabase
-  ```
-
-  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
-</details>
-
-### Run the CLI
-
-```bash
-supabase bootstrap
-```
-
-Or using npx:
-
-```bash
-npx supabase bootstrap
-```
-
-The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
-
-## Docs
-
-Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
-
-## Breaking changes
-
-We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
-
-However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
-
-## Developing
-
-To run from source:
-
-```sh
-# Go >= 1.22
-go run . help
-```
+See [LICENSE](LICENSE) for details.
