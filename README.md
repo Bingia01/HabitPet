@@ -1,10 +1,10 @@
-# HabitPet
+# Forki
 
 A gamified nutrition tracking iOS app that pairs you with a virtual pet companion. Log your meals, hit your calorie goals, and watch your pet thrive.
 
-## What is HabitPet?
+## What is Forki?
 
-HabitPet turns healthy eating into a game. You adopt a virtual pet — choose from characters like Avo Friend, Boba Buddy, or Berry Sweet — and your pet's mood and appearance reflect how well you're eating. Stay on track and your pet is happy; skip meals or overeat and it shows.
+Forki turns healthy eating into a game. You adopt a virtual pet — choose from characters like Avo Friend, Boba Buddy, or Berry Sweet — and your pet's mood and appearance reflect how well you're eating. Stay on track and your pet is happy; skip meals or overeat and it shows.
 
 The app combines real nutritional data from the USDA FoodData Central database with an AI-powered camera that can detect food and estimate calories from a photo.
 
