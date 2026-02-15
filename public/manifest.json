@@ -4,8 +4,8 @@
   "description": "Track your nutrition and care for your virtual pet",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#10b981",
+  "background_color": "#0A1128",
+  "theme_color": "#8DD4D1",
   "orientation": "portrait",
   "scope": "/",
   "icons": [

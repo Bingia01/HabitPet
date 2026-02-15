@@ -4,8 +4,7 @@
   "installCommand": "npm install",
   "git": {
     "deploymentEnabled": {
-      "main": true,
-      "feature/food-logging-supabase": true
+      "main": true
     }
   }
 }

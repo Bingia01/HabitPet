@@ -11,7 +11,7 @@ export default function Footer() {
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Newsletter signup:", email);
+    // TODO: Connect to email service (e.g. Mailchimp, SendGrid)
     setEmail("");
   };
 
@@ -30,7 +30,7 @@ export default function Footer() {
               <Button 
                 size="icon" 
                 variant="ghost"
-                onClick={() => console.log("Instagram clicked")}
+                onClick={() => window.open("https://instagram.com/forki.app", "_blank")}
                 className="rounded-full"
               >
                 <SiInstagram className="w-5 h-5 text-white" />
@@ -38,7 +38,7 @@ export default function Footer() {
               <Button 
                 size="icon" 
                 variant="ghost"
-                onClick={() => console.log("TikTok clicked")}
+                onClick={() => window.open("https://tiktok.com/@forki.app", "_blank")}
                 className="rounded-full"
               >
                 <SiTiktok className="w-5 h-5 text-white" />
@@ -46,7 +46,7 @@ export default function Footer() {
               <Button 
                 size="icon" 
                 variant="ghost"
-                onClick={() => console.log("X clicked")}
+                onClick={() => window.open("https://x.com/forki_app", "_blank")}
                 className="rounded-full"
               >
                 <SiX className="w-5 h-5 text-white" />
@@ -60,7 +60,21 @@ export default function Footer() {
               {["Features", "How It Works", "Pricing", "Community", "Support"].map((link) => (
                 <li key={link}>
                   <button 
-                    onClick={() => console.log(`Navigate to ${link}`)}
+                    onClick={() => {
+                      const sectionMap: Record<string, string> = {
+                        Features: "#features",
+                        "How It Works": "#how-it-works",
+                        Pricing: "#pricing",
+                        Community: "#community",
+                        Support: "mailto:janicechung@usc.edu",
+                      };
+                      const target = sectionMap[link];
+                      if (target?.startsWith("mailto:")) {
+                        window.location.href = target;
+                      } else if (target) {
+                        document.querySelector(target)?.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
                     className="text-[#B8B8C8] hover:text-[#8DD4D1] transition-colors"
                   >
                     {link}
@@ -98,7 +112,7 @@ export default function Footer() {
         <div className="pt-8 border-t border-[#7B68C4]/20">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-[#B8B8C8]">
-              © 2025 Forki. All rights reserved.
+              © 2025–2026 Forki. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
               <a 

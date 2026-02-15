@@ -23,7 +23,7 @@ export default function HeroSectionV2() {
     transition: {
       duration: 3,
       repeat: Infinity,
-      ease: "easeInOut",
+      ease: "easeInOut" as const,
     },
   };
 
@@ -34,7 +34,7 @@ export default function HeroSectionV2() {
     transition: {
       duration: 2,
       repeat: Infinity,
-      ease: "easeInOut",
+      ease: "easeInOut" as const,
     },
   };
 
@@ -47,7 +47,7 @@ export default function HeroSectionV2() {
       transition: {
         delay: i * 0.2,
         duration: 0.6,
-        ease: "easeOut",
+        ease: "easeOut" as const,
       },
     }),
   };

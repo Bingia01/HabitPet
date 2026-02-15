@@ -81,7 +81,7 @@ export default function MascotFeature() {
               </p>
               <div className="bg-[#2A3441]/60 rounded-2xl p-6 border-l-4 border-[#8DD4D1]">
                 <p className="italic text-[#E8E8F0]">
-                  "The Forki feature is genius! I actually look forward to logging my meals now. It's like having a companion that rewards healthy habits!" 
+                  &ldquo;The Forki feature is genius! I actually look forward to logging my meals now. It&apos;s like having a companion that rewards healthy habits!&rdquo;
                 </p>
                 <p className="text-sm text-[#B8B8C8] mt-3">— Sarah, Forki User</p>
               </div>
